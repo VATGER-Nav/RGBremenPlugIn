@@ -1,0 +1,19 @@
+{
+  "debug":  true,
+  "data": {
+    "sidstarForceDownload":  false,
+    "sidstarurl": "https://dms.vatsim-germany.org/s/CQxss89irorjZmp/download/clbdesc_sidstar.txt"
+  },
+  "colors": {
+    "lists": {
+      "sidstar": {
+        "yes": [ 0, 255, 0, 1 ],
+        "no": [ 255, 0, 0, 1]
+      }
+    },
+    "tag": {
+      "vfr": [ 0, 125, 125, 1 ],
+      "twr": [ 250, 170, 15, 1 ]
+    }
+  }
+}
