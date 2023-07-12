@@ -50,6 +50,11 @@ std::string Config::GetSidStarDownloadUrl()
 	return m_configData["data"]["sidstarurl"];
 }
 
+bool Config::GetCustomColorsUsageFlag()
+{
+	return m_configData["colors"]["useCustomColors"];
+}
+
 std::array<int, 4> Config::GetListColorSidStarYes()
 {
 	return m_configData["colors"]["lists"]["sidstar"]["yes"];
@@ -62,10 +67,10 @@ std::array<int, 4> Config::GetListColorSidStarNo()
 
 std::array<int, 4> Config::GetTagColorVFR()
 {
-	return m_configData["colors"]["tags"]["vfr"];
+	return m_configData["colors"]["tag"]["vfr"];
 }
 
 std::array<int, 4> Config::GetTagColorTWR()
 {
-	return m_configData["colors"]["tags"]["twr"];
+	return m_configData["colors"]["tag"]["twr"];
 }

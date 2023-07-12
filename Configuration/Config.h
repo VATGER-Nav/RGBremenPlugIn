@@ -26,6 +26,8 @@ public:
 	// SID STAR VIA Checker Download URL
 	bool GetSidStarForceDownload();
 	std::string GetSidStarDownloadUrl();
+	// Custom Colors
+	bool GetCustomColorsUsageFlag();
 	// List Colors
 	std::array<int, 4> GetListColorSidStarYes();
 	std::array<int, 4> GetListColorSidStarNo();

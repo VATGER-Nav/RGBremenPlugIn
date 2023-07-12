@@ -338,3 +338,7 @@ ASALocalRun/
 
 # BeatPulse healthcheck temp database
 healthchecksdb
+/version.txt
+/SectorFileProviderDescriptor.txt
+/ipaddr.txt
+/euroscope_sector_providers.txt

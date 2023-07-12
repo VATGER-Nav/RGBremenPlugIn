@@ -17,7 +17,6 @@ SidStarHandler::SidStarHandler(Config *config)
 
 SidStarHandler::~SidStarHandler()
 {
-	delete m_Config;
 }
 
 void SidStarHandler::DownloadDefinitionFile()

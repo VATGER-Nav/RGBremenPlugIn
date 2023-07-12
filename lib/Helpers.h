@@ -3,6 +3,9 @@
 #include <vector>
 #include <string>
 #include <regex>
+#include <wtypes.h>
+#include <sstream>
+#include <iomanip>
 
 inline std::vector<std::string> Tokenize(const std::string str, const std::regex regex)
 {
@@ -14,4 +17,10 @@ inline std::vector<std::string> Tokenize(const std::string str, const std::regex
 			result.emplace_back(it->str());
 	}
 	return result;
+}
+
+inline std::string padWithZeros(int padding, int s) {
+	std::stringstream ss;
+	ss << std::setfill('0') << std::setw(padding) << s;
+	return ss.str();
 }

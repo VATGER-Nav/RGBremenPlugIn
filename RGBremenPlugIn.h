@@ -6,6 +6,7 @@
 #include <EuroScopePlugIn.h>
 #include <string>
 #include "SidStar/SidStarHandler.h"
+#include "Tag/TagHandler.h"
 
 
 using namespace std;
@@ -15,8 +16,9 @@ using namespace EuroScopePlugIn;
 class RGBremenPlugIn : public EuroScopePlugIn::CPlugIn
 {
 private:
-	Config *m_Config;
+	Config* m_Config;
 	SidStarHandler* m_SidStarHandler;
+	TagHandler* m_TagHandler;
 public:
 	RGBremenPlugIn();
 	virtual ~RGBremenPlugIn();
@@ -36,4 +38,5 @@ public:
 	virtual void    OnRefreshFpListContent(CFlightPlanList AcList);
 	virtual void    OnNewMetarReceived(const char* sStation, const char* sFullMetar);
 	virtual void    OnFunctionCall(int FunctionId, const char* sItemString, POINT Pt, RECT Area);
+	virtual void	OnTimer(int Counter);
 };
