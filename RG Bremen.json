@@ -5,7 +5,7 @@
 		"sidstarurl": "https://dms.vatsim-germany.org/s/CQxss89irorjZmp/download/clbdesc_sidstar.txt"
 	},
 	"colors": {
-		"useCustomColors":  false,
+		"useCustomColors": true,
 		"lists": {
 			"sidstar": {
 				"yes": [ 0, 255, 0, 1 ],
@@ -15,6 +15,24 @@
 		"tag": {
 			"vfr": [ 0, 125, 125, 1 ],
 			"twr": [ 250, 170, 15, 1 ]
+		}
+	},
+	"airspeed": {
+		"mach": {
+			"prefix": "M",
+			"digits": 2,
+			"thresholdFL": 245,
+			"unreliableIndicator": "--",
+			"unreliableColor": "123,123,123"
+		},
+		"ias": {
+			"prefix": "N",
+			"unreliableIndicator": "--",
+			"unreliableColor": "123,123,123"
+		},
+		"weather": {
+			"url": "https://wx.vatsim-germany.org/api/regions/EDXX/wx",
+			"update": 30
 		}
 	}
 }

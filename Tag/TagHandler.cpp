@@ -31,7 +31,7 @@ TagItemContainer TagHandler::HandleTagItem(EuroScopePlugIn::CFlightPlan f, EuroS
 			tic.sItemString = tmp;
 		}
 		else {
-			tic.sItemString = "   ";
+			tic.sItemString = "";
 		}
 		break;
 	case RG_BREMEN_TAG_ITEM_ALTITUDE:
@@ -75,11 +75,11 @@ TagItemContainer TagHandler::HandleTagItem(EuroScopePlugIn::CFlightPlan f, EuroS
 				tic.sItemString = ("N" + padWithZeros(2, r.GetPosition().GetReportedGS() / 10)).substr(0, 3);
 			}
 			else {
-				tic.sItemString = "   ";
+				tic.sItemString = "";
 			}
 		}
 		else {
-			tic.sItemString = "   ";
+			tic.sItemString = "";
 		}
 		break;
 	case RG_BREMEN_TAG_ITEM_DESTINATION:
@@ -87,7 +87,7 @@ TagItemContainer TagHandler::HandleTagItem(EuroScopePlugIn::CFlightPlan f, EuroS
 			tic.sItemString = f.GetFlightPlanData().GetDestination();
 		}
 		else {
-			tic.sItemString = "   ";
+			tic.sItemString = "";
 		}
 		break;
 	case RG_BREMEN_TAG_ITEM_SIDSTAR:
@@ -150,9 +150,9 @@ TagItemContainer TagHandler::HandleTagItem(EuroScopePlugIn::CFlightPlan f, EuroS
 		tic.sItemString = "WIP";
 		break;
 	case RG_BREMEN_TAG_ITEM_VFR_INDICATOR:
-		tic.customColor = true;
-		tic.color = RGB(m_Configuration->GetTagColorVFR()[0], m_Configuration->GetTagColorVFR()[1], m_Configuration->GetTagColorVFR()[2]);
 		if (SquawkHandler::IsSquawkVFR(atoi(r.GetPosition().GetSquawk()))) {
+			tic.customColor = true;
+			tic.color = RGB(m_Configuration->GetTagColorVFR()[0], m_Configuration->GetTagColorVFR()[1], m_Configuration->GetTagColorVFR()[2]);
 			switch (atoi(r.GetPosition().GetSquawk()))
 			{
 			case 0:
@@ -224,12 +224,16 @@ TagItemContainer TagHandler::HandleTagItem(EuroScopePlugIn::CFlightPlan f, EuroS
 		break;
 	case RG_BREMEN_TAG_ITEM_VFR_CALLSIGN:
 		tic.sItemString = r.GetCallsign();
-		tic.customColor = true;
-		tic.color = RGB(m_Configuration->GetTagColorVFR()[0], m_Configuration->GetTagColorVFR()[1], m_Configuration->GetTagColorVFR()[2]);
+		if(SquawkHandler::IsSquawkVFR(atoi(r.GetPosition().GetSquawk()))) {
+			tic.customColor = true;
+			tic.color = RGB(m_Configuration->GetTagColorVFR()[0], m_Configuration->GetTagColorVFR()[1], m_Configuration->GetTagColorVFR()[2]);
+		}
 		break;
 	case RG_BREMEN_TAG_ITEM_VFR_ALTITUDE:
-		tic.customColor = true;
-		tic.color = RGB(m_Configuration->GetTagColorVFR()[0], m_Configuration->GetTagColorVFR()[1], m_Configuration->GetTagColorVFR()[2]);
+		if (SquawkHandler::IsSquawkVFR(atoi(r.GetPosition().GetSquawk()))) {
+			tic.customColor = true;
+			tic.color = RGB(m_Configuration->GetTagColorVFR()[0], m_Configuration->GetTagColorVFR()[1], m_Configuration->GetTagColorVFR()[2]);
+		}
 		if (r.GetPosition().GetFlightLevel() <= m_TransitionAltitude) {
 			tic.sItemString = ("A" + padWithZeros(4, r.GetPosition().GetPressureAltitude())).substr(0, 3);
 		}
@@ -238,24 +242,24 @@ TagItemContainer TagHandler::HandleTagItem(EuroScopePlugIn::CFlightPlan f, EuroS
 		}
 		break;
 	case RG_BREMEN_TAG_ITEM_VFR_INDICATED_AIRSPEED:
-		tic.customColor = true;
-		tic.color = RGB(m_Configuration->GetTagColorVFR()[0], m_Configuration->GetTagColorVFR()[1], m_Configuration->GetTagColorVFR()[2]);
 		if (!SquawkHandler::IsSquawkVFR(atoi(r.GetPosition().GetSquawk()))) {
 			if (r.GetPosition().GetReportedGS() / 10 <= 99) {
 				tic.sItemString = ("N" + padWithZeros(2, r.GetPosition().GetReportedGS() / 10)).substr(0, 3);
 			}
 			else {
-				tic.sItemString = "   ";
+				tic.sItemString = "";
 			}
 		}
 		else {
-			tic.sItemString = "   ";
+			tic.customColor = true;
+			tic.color = RGB(m_Configuration->GetTagColorVFR()[0], m_Configuration->GetTagColorVFR()[1], m_Configuration->GetTagColorVFR()[2]);
+			tic.sItemString = "";
 		}
 		break;
 	case RG_BREMEN_TAG_ITEM_TWR_INDICATOR:
-		tic.customColor = true;
-		tic.color = RGB(m_Configuration->GetTagColorTWR()[0], m_Configuration->GetTagColorTWR()[1], m_Configuration->GetTagColorTWR()[2]);
 		if (SquawkHandler::IsSquawkVFR(atoi(r.GetPosition().GetSquawk()))) {
+			tic.customColor = true;
+			tic.color = RGB(m_Configuration->GetTagColorTWR()[0], m_Configuration->GetTagColorTWR()[1], m_Configuration->GetTagColorTWR()[2]);
 			switch (atoi(r.GetPosition().GetSquawk()))
 			{
 			case 0:
@@ -326,13 +330,17 @@ TagItemContainer TagHandler::HandleTagItem(EuroScopePlugIn::CFlightPlan f, EuroS
 		}
 		break;
 	case RG_BREMEN_TAG_ITEM_TWR_CALLSIGN:
-		tic.customColor = true;
-		tic.color = RGB(m_Configuration->GetTagColorTWR()[0], m_Configuration->GetTagColorTWR()[1], m_Configuration->GetTagColorTWR()[2]);
+		if (SquawkHandler::IsSquawkVFR(atoi(r.GetPosition().GetSquawk()))) {
+			tic.color = RGB(m_Configuration->GetTagColorTWR()[0], m_Configuration->GetTagColorTWR()[1], m_Configuration->GetTagColorTWR()[2]);
+			tic.customColor = true;
+		}
 		tic.sItemString = r.GetCallsign();
 		break;
 	case RG_BREMEN_TAG_ITEM_TWR_ALTITUDE:
-		tic.customColor = true;
-		tic.color = RGB(m_Configuration->GetTagColorTWR()[0], m_Configuration->GetTagColorTWR()[1], m_Configuration->GetTagColorTWR()[2]);
+		if (SquawkHandler::IsSquawkVFR(atoi(r.GetPosition().GetSquawk()))) {
+			tic.color = RGB(m_Configuration->GetTagColorTWR()[0], m_Configuration->GetTagColorTWR()[1], m_Configuration->GetTagColorTWR()[2]);
+			tic.customColor = true;
+		}
 		if (r.GetPosition().GetFlightLevel() <= m_TransitionAltitude) {
 			tic.sItemString = ("A" + padWithZeros(4, r.GetPosition().GetPressureAltitude())).substr(0, 3);
 		}
@@ -341,18 +349,18 @@ TagItemContainer TagHandler::HandleTagItem(EuroScopePlugIn::CFlightPlan f, EuroS
 		}
 		break;
 	case RG_BREMEN_TAG_ITEM_TWR_INDICATED_AIRSPEED:
-		tic.customColor = true;
-		tic.color = RGB(m_Configuration->GetTagColorTWR()[0], m_Configuration->GetTagColorTWR()[1], m_Configuration->GetTagColorTWR()[2]);
 		if (!SquawkHandler::IsSquawkVFR(atoi(r.GetPosition().GetSquawk()))) {
 			if (r.GetPosition().GetReportedGS() / 10 <= 99) {
 				tic.sItemString = ("N" + padWithZeros(2, r.GetPosition().GetReportedGS() / 10)).substr(0, 3);
 			}
 			else {
-				tic.sItemString = "   ";
+				tic.sItemString = "";
 			}
 		}
 		else {
-			tic.sItemString = "   ";
+			tic.color = RGB(m_Configuration->GetTagColorTWR()[0], m_Configuration->GetTagColorTWR()[1], m_Configuration->GetTagColorTWR()[2]);
+			tic.customColor = true;
+			tic.sItemString = "";
 		}
 		break;
 	default:
