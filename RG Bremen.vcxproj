@@ -109,6 +109,7 @@
       <ConformanceMode>true</ConformanceMode>
       <TreatWChar_tAsBuiltInType>false</TreatWChar_tAsBuiltInType>
       <AdditionalIncludeDirectories>$(ProjectDir)\lib\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -153,6 +154,8 @@
     <ClInclude Include="Configuration\Defines.h" />
     <ClInclude Include="Http\Http.h" />
     <ClInclude Include="lib\Helpers.h" />
+    <ClInclude Include="LoA\LoaDefinition.h" />
+    <ClInclude Include="LoA\NextSectorStructure.h" />
     <ClInclude Include="RGBremenPlugIn.h" />
     <ClInclude Include="lib\include\EuroScopePlugIn.h" />
     <ClInclude Include="SidStar\SID.h" />
@@ -172,6 +175,7 @@
     <ClCompile Include="Configuration\Config.cpp" />
     <ClCompile Include="DLLexport.cpp" />
     <ClCompile Include="Http\Http.cpp" />
+    <ClCompile Include="LoA\LoaDefinition.cpp" />
     <ClCompile Include="RGBremenPlugIn.cpp" />
     <ClCompile Include="SidStar\SidStarHandler.cpp" />
     <ClCompile Include="Squawk\SquawkHandler.cpp" />
@@ -184,6 +188,13 @@
     <CopyFileToFolders Include="RG Bremen.json">
       <DeploymentContent>true</DeploymentContent>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</ExcludedFromBuild>
+      <FileType>Document</FileType>
+    </CopyFileToFolders>
+  </ItemGroup>
+  <ItemGroup>
+    <CopyFileToFolders Include="RG Bremen Loa.json">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</ExcludedFromBuild>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</DeploymentContent>
       <FileType>Document</FileType>
     </CopyFileToFolders>
   </ItemGroup>

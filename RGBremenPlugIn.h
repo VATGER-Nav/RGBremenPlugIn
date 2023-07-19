@@ -24,6 +24,8 @@
 #include "SidStar/SidStarHandler.h"
 #include "Tag/TagHandler.h"
 #include "Weather/Weather.h"
+#include "LoA/LoaDefinition.h"
+#include "LoA/NextSectorStructure.h"
 
 class RGBremenPlugIn : public EuroScopePlugIn::CPlugIn
 {
@@ -31,6 +33,7 @@ private:
 	Config* m_Config;
 	SidStarHandler* m_SidStarHandler;
 	TagHandler* m_TagHandler;
+	LetterOfAgreement::LoaDefinition* m_LoaDefinition;
 
 	std::chrono::minutes weatherUpdateInterval;
 	std::string weatherUpdateURL;
@@ -65,27 +68,6 @@ private:
 	void InitializeAirspeedHandler();
 	void LogMessage(std::string msg, std::string channel);
 	void LogDebugMessage(std::string msg, std::string channel);
-public:
-	RGBremenPlugIn();
-	virtual ~RGBremenPlugIn();
-	virtual void    OnControllerPositionUpdate(EuroScopePlugIn::CController Controller);
-	virtual void    OnControllerDisconnect(EuroScopePlugIn::CController Controller);
-	virtual void    OnRadarTargetPositionUpdate(EuroScopePlugIn::CRadarTarget RadarTarget);
-	virtual void    OnFlightPlanDisconnect(EuroScopePlugIn::CFlightPlan FlightPlan);
-	virtual void    OnFlightPlanFlightPlanDataUpdate(EuroScopePlugIn::CFlightPlan FlightPlan);
-	virtual void    OnPlaneInformationUpdate(const char* sCallsign, const char* sLivery, const char* sPlaneType);
-	virtual void    OnFlightPlanControllerAssignedDataUpdate(EuroScopePlugIn::CFlightPlan FlightPlan, int DataType);
-	virtual void    OnFlightPlanFlightStripPushed(EuroScopePlugIn::CFlightPlan FlightPlan, const char* sSenderController, const char* sTargetController);
-	virtual EuroScopePlugIn::CRadarScreen* OnRadarScreenCreated(const char* sDisplayName, bool NeedRadarContent, bool GeoReferenced, bool CanBeSaved, bool CanBeCreated);
-	virtual bool    OnCompileCommand(const char* sCommandLine);
-	virtual void    OnCompileFrequencyChat(const char* sSenderCallsign, double Frequency, const char* sChatMessage);
-	virtual void    OnCompilePrivateChat(const char* sSenderCallsign, const char* sReceiverCallsign, const char* sChatMessage);
-    virtual void    OnGetTagItem(EuroScopePlugIn::CFlightPlan FlightPlan, EuroScopePlugIn::CRadarTarget RadarTarget, int ItemCode, int TagData, char sItemString[16], int* pColorCode, COLORREF* pRGB, double* pFontSize);
-	virtual void    OnRefreshFpListContent(EuroScopePlugIn::CFlightPlanList AcList);
-	virtual void    OnNewMetarReceived(const char* sStation, const char* sFullMetar);
-	virtual void    OnFunctionCall(int FunctionId, const char* sItemString, POINT Pt, RECT Area);
-	virtual void	OnTimer(int Counter);
-
 	void SetReportedIAS(const EuroScopePlugIn::CFlightPlan& fp, std::string selected);
 	void ClearReportedIAS(const EuroScopePlugIn::CFlightPlan& fp);
 	void ToggleCalculatedIAS(const EuroScopePlugIn::CFlightPlan& fp, bool abbreviated = false);
@@ -113,4 +95,26 @@ public:
 	void StartWeatherUpdater();
 	void StopWeatherUpdater();
 	void ResetWeatherUpdater();
+
+	NextSectorStructure CalculateNextSector(const EuroScopePlugIn::CFlightPlan& fp, const EuroScopePlugIn::CRadarTarget& rt);
+public:
+	RGBremenPlugIn();
+	virtual ~RGBremenPlugIn();
+	virtual void    OnControllerPositionUpdate(EuroScopePlugIn::CController Controller);
+	virtual void    OnControllerDisconnect(EuroScopePlugIn::CController Controller);
+	virtual void    OnRadarTargetPositionUpdate(EuroScopePlugIn::CRadarTarget RadarTarget);
+	virtual void    OnFlightPlanDisconnect(EuroScopePlugIn::CFlightPlan FlightPlan);
+	virtual void    OnFlightPlanFlightPlanDataUpdate(EuroScopePlugIn::CFlightPlan FlightPlan);
+	virtual void    OnPlaneInformationUpdate(const char* sCallsign, const char* sLivery, const char* sPlaneType);
+	virtual void    OnFlightPlanControllerAssignedDataUpdate(EuroScopePlugIn::CFlightPlan FlightPlan, int DataType);
+	virtual void    OnFlightPlanFlightStripPushed(EuroScopePlugIn::CFlightPlan FlightPlan, const char* sSenderController, const char* sTargetController);
+	virtual EuroScopePlugIn::CRadarScreen* OnRadarScreenCreated(const char* sDisplayName, bool NeedRadarContent, bool GeoReferenced, bool CanBeSaved, bool CanBeCreated);
+	virtual bool    OnCompileCommand(const char* sCommandLine);
+	virtual void    OnCompileFrequencyChat(const char* sSenderCallsign, double Frequency, const char* sChatMessage);
+	virtual void    OnCompilePrivateChat(const char* sSenderCallsign, const char* sReceiverCallsign, const char* sChatMessage);
+    virtual void    OnGetTagItem(EuroScopePlugIn::CFlightPlan FlightPlan, EuroScopePlugIn::CRadarTarget RadarTarget, int ItemCode, int TagData, char sItemString[16], int* pColorCode, COLORREF* pRGB, double* pFontSize);
+	virtual void    OnRefreshFpListContent(EuroScopePlugIn::CFlightPlanList AcList);
+	virtual void    OnNewMetarReceived(const char* sStation, const char* sFullMetar);
+	virtual void    OnFunctionCall(int FunctionId, const char* sItemString, POINT Pt, RECT Area);
+	virtual void	OnTimer(int Counter);
 };

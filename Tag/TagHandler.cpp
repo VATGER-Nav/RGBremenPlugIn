@@ -140,7 +140,7 @@ TagItemContainer TagHandler::HandleTagItem(EuroScopePlugIn::CFlightPlan f, EuroS
 			}
 		}
 		break;
-	case RG_BREMEN_TAG_ITEM_COPX:
+	/*case RG_BREMEN_TAG_ITEM_COPX:
 		tic.sItemString = "WIP";
 		break;
 	case RG_BREMEN_TAG_ITEM_TRANSFER_FLIGHT_LEVEL:
@@ -148,7 +148,7 @@ TagItemContainer TagHandler::HandleTagItem(EuroScopePlugIn::CFlightPlan f, EuroS
 		break;
 	case RG_BREMEN_TAG_ITEM_NEXT_SECTOR:
 		tic.sItemString = "WIP";
-		break;
+		break;*/
 	case RG_BREMEN_TAG_ITEM_VFR_INDICATOR:
 		if (SquawkHandler::IsSquawkVFR(atoi(r.GetPosition().GetSquawk()))) {
 			tic.customColor = true;

@@ -69,6 +69,12 @@
     <ClInclude Include="Threading\PeriodicAction.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="LoA\LoaDefinition.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="LoA\NextSectorStructure.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="RGBremenPlugIn.cpp">
@@ -107,9 +113,15 @@
     <ClCompile Include="Threading\PeriodicAction.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="LoA\LoaDefinition.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CopyFileToFolders Include="RG Bremen.json">
+      <Filter>Source Files</Filter>
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="RG Bremen Loa.json">
       <Filter>Source Files</Filter>
     </CopyFileToFolders>
   </ItemGroup>

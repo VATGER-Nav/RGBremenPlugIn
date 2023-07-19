@@ -1,0 +1,441 @@
+{
+  "ALR": {
+    "Arrivals": [
+      {
+        "icaos": [ "EDHK", "EDXR" ],
+        "cops": [ "ELSOB" ],
+        "level": 11000,
+        "vs": "desc",
+        "directs": [ "KIL" ],
+        "toSector": "EIDE"
+      },
+      {
+        "icaos": [ "ETNH", "ETNS" ],
+        "cops": [ "ELSOB" ],
+        "level": 11000,
+        "vs": "desc",
+        "directs": [ "HN", "SWG" ],
+        "toSector": "EIDE"
+      },
+      {
+        "icaos": [ "EDXF" ],
+        "cops": [ "ELSOB" ],
+        "level": -1,
+        "vs": "",
+        "directs": [ ],
+        "toSector": "EIDE"
+      },
+      {
+        "icaos": [ "ETNH", "ETNS" ],
+        "cops": [ "WSN" ],
+        "level": 11000,
+        "vs": "desc",
+        "directs": [ "HN", "SWG" ],
+        "toSector": "EIDW"
+      },
+      {
+        "icaos": [ "EDWE", "EDWI" ],
+        "cops": [ "OTEXE" ],
+        "level": 11000,
+        "vs": "desc",
+        "directs": [ ],
+        "toSector": "FRI"
+      },
+      {
+        "icaos": [ "EDDW" ],
+        "cops": [ "EKROV", "WSN" ],
+        "level": 11000,
+        "vs": "desc",
+        "directs": [ ],
+        "toSector": "FRI"
+      },
+      {
+        "icaos": [ "EHGG" ],
+        "cops": [ "OTEXE" ],
+        "level": -1,
+        "vs": "",
+        "directs": [ ],
+        "toSector": "FRI"
+      },
+      {
+        "icaos": [ "EDDV", "ETNW", "ETHB", "ETHC" ],
+        "cops": [ "IDEKO" ],
+        "level": -1,
+        "vs": "",
+        "directs": [ ],
+        "toSector": "FRI"
+      },
+      {
+        "icaos": [ "EDDH", "EDHI" ],
+        "cops": [ "RIBSO" ],
+        "level": -1,
+        "vs": "",
+        "directs": [ ],
+        "toSector": "HAMW"
+      },
+      {
+        "icaos": [ "EDHL" ],
+        "cops": [ "RIBSO" ],
+        "level": -1,
+        "vs": "",
+        "directs": [ ],
+        "toSector": "HAME"
+      },
+      {
+        "icaos": [ "EDVE" ],
+        "cops": [ "ELSOB" ],
+        "level": -1,
+        "vs": "",
+        "directs": [ ],
+        "toSector": "HEI"
+      }
+    ],
+    "Departures": [
+      {
+        "icaos": [ "EDDH", "EDHI" ],
+        "cops": [ "NIE" ],
+        "level": 0,
+        "vs": "",
+        "directs": [],
+        "toSector": "EMS"
+      },
+      {
+        "icaos": [ "EDDW" ],
+        "cops": [ "HAM", "GESTO" ],
+        "level": 24000,
+        "vs": "",
+        "directs": [],
+        "toSector": "HEI"
+      }
+    ]
+  },
+  "HAME": {
+    "Arrivals": [
+
+    ],
+    "Departures": [
+      {
+        "icaos": [ "EDDH", "EDHL" ],
+        "cops": [ "EKERN" ],
+        "level": -1,
+        "vs": "",
+        "directs": [],
+        "toSector": "EIDE"
+      },
+      {
+        "icaos": [ "EDDH", "EDHI", "EDHL" ],
+        "cops": [ "AMLUH", "LUGEG", "RAMAR" ],
+        "level": -1,
+        "vs": "",
+        "directs": [],
+        "toSector": "HEI"
+      },
+      {
+        "icaos": [ "EDHL" ],
+        "cops": [ "OLUBI", "BERIM" ],
+        "level": 10000,
+        "vs": "",
+        "directs": [],
+        "toSector": "MRZ"
+      }
+    ]
+  },
+  "HAMW": {
+    "Arrivals": [
+      {
+        "icaos": [ "EDHL" ],
+        "cop": "BOGMU",
+        "level": -1,
+        "vs": "",
+        "directs": [],
+        "toSector": "HAME"
+      }
+    ],
+    "Departures": [
+      {
+        "icaos": [ "EDDH", "EDHI" ],
+        "cops": [ "WSN", "BASUM", "IDEKO", "ELSOB" ],
+        "level": -1,
+        "vs": "",
+        "directs": [],
+        "toSector": "ALR"
+      }
+    ]
+  },
+  "HEI": {
+    "Arrivals": [
+      {
+        "icaos": [ "EDWE", "EDWI", "ETMN" ],
+        "cops": [ "HAM", "AMLUH" ],
+        "level": 24000,
+        "vs": "",
+        "directs": [],
+        "toSector": "ALR"
+      },
+      {
+        "icaos": [ "EDDW" ],
+        "cops": [ "GESTO" ],
+        "level": 16000,
+        "vs": "desc",
+        "directs": [],
+        "toSector": "ALR"
+      },
+      {
+        "icaos": [ "EDHK" ],
+        "cops": [ "NIGAD" ],
+        "level": 11000,
+        "vs": "desc",
+        "directs": [ "KIL" ],
+        "toSector": "EIDE"
+      },
+      {
+        "icaos": [ "EDHK", "EDXR" ],
+        "cops": [ "HAM" ],
+        "level": 11000,
+        "vs": "",
+        "directs": [ "KIL" ],
+        "toSector": "EIDE"
+      },
+      {
+        "icaos": [ "ETNH", "ETNS" ],
+        "cops": [ "HAM" ],
+        "level": 11000,
+        "vs": "",
+        "directs": [ "HN", "SWG" ],
+        "toSector": "EIDE"
+      },
+      {
+        "icaos": [ "EDXF" ],
+        "cops": [ "HAM" ],
+        "level": -1,
+        "vs": "",
+        "directs": [],
+        "toSector": "EIDE"
+      },
+      {
+        "icaos": [ "EDDH", "EDHI" ],
+        "cops": [ "RARUP", "BOGMU", "NOLGO", "HAM" ],
+        "level": -1,
+        "vs": "",
+        "directs": [],
+        "toSector": "HAME"
+      },
+      {
+        "icaos": [ "EDHL" ],
+        "cops": [ "RARUP", "BOGMU", "NOLGO", "LYE" ],
+        "level": -1,
+        "vs": "",
+        "directs": [],
+        "toSector": "HAME"
+      },
+      {
+        "icaos": [ "EDDV", "ETNW" ],
+        "cops": [ "CEL" ],
+        "level": -1,
+        "vs": "",
+        "directs": [],
+        "toSector": "HAN"
+      },
+      {
+        "icaos": [ "EDVE" ],
+        "cops": [ "DIRBO", "ULSEN" ],
+        "level": -1,
+        "vs": "",
+        "directs": [],
+        "toSector": "HAN"
+      }
+    ],
+    "Departures": [
+      {
+        "icaos": [ "EDDH", "EDHI", "EDHL", "EDHK" ],
+        "cops": [ "NUSGU", "PABMI" ],
+        "level": 17000,
+        "vs": "clb",
+        "directs": [],
+        "toSector": "MAR"
+      },
+      {
+        "icaos": [ "EDDV", "ETNW" ],
+        "cops": [ "DIRBO" ],
+        "level": 23000,
+        "vs": "clb",
+        "directs": [],
+        "toSector": "MAR"
+      },
+      {
+        "icaos": [ "EDDW" ],
+        "cops": [ "NEBUN" ],
+        "level": 23000,
+        "vs": "",
+        "directs": [],
+        "toSector": "MAR"
+      },
+      {
+        "icaos": [ "EDDH", "EDHI", "EDHK" ],
+        "cops": [ "OLUBI", "BERIM" ],
+        "level": 23000,
+        "vs": "clb",
+        "directs": [],
+        "toSector": "MRZ"
+      },
+      {
+        "icaos": [ "ETNS", "ETNH" ],
+        "cops": [ "LUGEG" ],
+        "level": 23000,
+        "vs": "",
+        "directs": [],
+        "toSector": "MRZ"
+      }
+    ]
+  },
+  "EIDE": {
+    "Arrivals": [
+      {
+        "icaos": [ "EDDH", "EDHI", "EDHL" ],
+        "cops": [ "BOGMU" ],
+        "level": -1,
+        "vs": "",
+        "directs": [],
+        "toSector": "HAME"
+      }
+    ],
+    "Departures": [
+      {
+        "icaos": [ "EDHK", "ETNH" ],
+        "cops": [ "ELSOB" ],
+        "level": -1,
+        "vs": "",
+        "directs": [],
+        "toSector": "ALR"
+      },
+      {
+        "icaos": [ "EDXW" ],
+        "cops": [ "DHE", "GOLEN" ],
+        "level": -1,
+        "vs": "",
+        "directs": [],
+        "toSector": "EIDW"
+      },
+      {
+        "icaos": [ "EDHK", "ETNH", "ETNS" ],
+        "cops": [ "LUGEG", "HAM" ],
+        "level": -1,
+        "vs": "",
+        "directs": [],
+        "toSector": "HEI"
+      }
+    ]
+  },
+  "EIDW": {
+    "Arrivals": [
+      {
+        "icaos": [ "EDXW" ],
+        "cops": [ "DHE", "GOLEN" ],
+        "level": -1,
+        "vs": "",
+        "directs": [],
+        "toSector": "EIDE"
+      },
+      {
+        "icaos": [ "EDXF" ],
+        "cops": [ "DHE" ],
+        "level": -1,
+        "vs": "",
+        "directs": [],
+        "toSector": "EIDE"
+      },
+      {
+        "icaos": [ "EDDH", "EDHI" ],
+        "cops": [ "RIBSO" ],
+        "level": -1,
+        "vs": "",
+        "directs": [],
+        "toSector": "HAMW"
+      }
+    ],
+    "Departures": [
+      {
+        "icaos": [ "EDWE" ],
+        "cops": [ "EMPIT" ],
+        "level": 5000,
+        "vs": "",
+        "directs": [],
+        "toSector": "FRI"
+      },
+      {
+        "icaos": [ "EDWI" ],
+        "cops": [ "DOTOB" ],
+        "level": 4000,
+        "vs": "",
+        "directs": [],
+        "toSector": "FRI"
+      },
+      {
+        "icaos": [ "ETMN", "ETNT" ],
+        "cops": [ "NDO", "WTM" ],
+        "level": -1,
+        "vs": "",
+        "directs": [],
+        "toSector": "FRI"
+      }
+    ]
+  },
+  "FRI": {
+    "Arrivals": [
+      {
+        "icaos": [ "EDWE", "EDWI" ],
+        "cops": [ "EMPIT", "DOTOB" ],
+        "level": 5000,
+        "vs": "",
+        "directs": [],
+        "toSector": "EIDW"
+      },
+      {
+        "icaos": [ "ETMN", "ETNT" ],
+        "cops": [ "NDO", "WTM" ],
+        "level": -1,
+        "vs": "",
+        "directs": [],
+        "toSector": "EIDW"
+      },
+      {
+        "icaos": [ "EDDV", "ETNW", "ETHB", "ETHC" ],
+        "cops": [ "NIE" ],
+        "level": -1,
+        "vs": "",
+        "directs": [],
+        "toSector": "HAN"
+      }
+    ],
+    "Departures": [
+      {
+        "icaos": [ "EDDW" ],
+        "cops": [ "GESTO", "WSN" ],
+        "level": 10000,
+        "vs": "clb",
+        "directs": [],
+        "toSector": "ALR"
+      },
+      {
+        "icaos": [ "EDWE", "EDWF", "EDWI" ],
+        "cops": [ "POBZU" ],
+        "level": -1,
+        "vs": "",
+        "directs": [],
+        "toSector": "ALR"
+      },
+      {
+        "icaos": [ "EDDW" ],
+        "cops": [ "BASUM", "NIE", "ERLAD" ],
+        "level": 10000,
+        "vs": "clb",
+        "directs": [],
+        "toSector": "EMS"
+      }
+    ]
+  },
+  "DST": {
+    "Arrivals": [],
+    "Departures": []
+  }
+}

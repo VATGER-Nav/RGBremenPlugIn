@@ -240,6 +240,9 @@ RGBremenPlugIn::RGBremenPlugIn() : EuroScopePlugIn::CPlugIn(
 	// Initialize Airspeed Calculation
 	InitializeAirspeedHandler();
 
+	// Load LoA Definition
+	m_LoaDefinition = new LetterOfAgreement::LoaDefinition();
+
 	DisplayUserMessage(pluginName.c_str(), "Initialisation", ("Version " + version + " loaded").c_str(), true, false, false, false, false);
 }
 
@@ -449,6 +452,28 @@ void RGBremenPlugIn::OnGetTagItem(EuroScopePlugIn::CFlightPlan FlightPlan, EuroS
 			*pColorCode = EuroScopePlugIn::TAG_COLOR_RGB_DEFINED;
 			*pRGB = RGB(m_Config->GetTagColorVFR()[0], m_Config->GetTagColorVFR()[1], m_Config->GetTagColorVFR()[2]);
 		}
+	}
+
+	// Handle Next Sector Preview
+	NextSectorStructure nss = CalculateNextSector(FlightPlan, RadarTarget);
+	switch (ItemCode)
+	{
+	case RG_BREMEN_TAG_ITEM_NEXT_SECTOR:
+		if(nss.isValid) {
+			std::stringstream ss;
+			ss << nss.nextSectorId;
+			strncpy_s(sItemString, 15, ss.str().c_str(), 15);
+		}
+		break;
+	case RG_BREMEN_TAG_ITEM_TRANSFER_FLIGHT_LEVEL:
+		if (nss.isValid) {
+			std::stringstream ss;
+			ss << "@FL" << nss.copAltitude / 1000 << (nss.clbDesc > 0) ? "^" : (nss.clbDesc < 0) ? "|" : "-";
+			strncpy_s(sItemString, 15, ss.str().c_str(), 15);
+		}
+		break;
+	default:
+		break;
 	}
 
 	// Handle Airspeed Indication Items
@@ -969,7 +994,7 @@ void RGBremenPlugIn::CheckLoginState()
 	case EuroScopePlugIn::CONNECTION_TYPE_DIRECT:
 	case EuroScopePlugIn::CONNECTION_TYPE_VIA_PROXY:
 		this->StartWeatherUpdater();
-		//this->CheckFlightStripAnnotationsForAllAircraft();
+		this->CheckFlightStripAnnotationsForAllAircraft();
 		break;
 	default:
 		this->StopWeatherUpdater();
@@ -1029,4 +1054,122 @@ void RGBremenPlugIn::ResetWeatherUpdater()
 {
 	this->StopWeatherUpdater();
 	this->CheckLoginState();
+}
+
+NextSectorStructure RGBremenPlugIn::CalculateNextSector(const EuroScopePlugIn::CFlightPlan& fp, const EuroScopePlugIn::CRadarTarget& rt)
+{
+	if (!fp.IsValid() || !rt.IsValid()) return NextSectorStructure{};
+
+	//const char* sectorId = ControllerMyself().GetPositionId();
+	const char* sectorId = "DST"; // FOR DEBUGING
+
+	nlohmann::json sectorDefinition = this->m_LoaDefinition->GetSectorDefinition(sectorId);
+	if (sectorDefinition == nullptr) return NextSectorStructure{};
+
+	if (m_Config->GetDebugMode()) {
+		LogMessage("Found sector definition for active sector", "LoA Definition");
+	}
+
+	std::string icaoDep, icaoArr = "";
+	icaoDep = fp.GetFlightPlanData().GetOrigin();
+	icaoArr = fp.GetFlightPlanData().GetDestination();
+
+	// One sector item is defined like this
+	// Structure is the same for Departures and Arrivals
+	/*{
+		"icaos": ["ETNH", "ETNS"] ,
+		"cops" : ["HAM"] ,
+		"level" : 11000,
+		"vs" : "",
+		"directs" : ["HN", "SWG"] ,
+		"toSector" : "EIDE"
+	},*/
+
+	const char* filedRoute = fp.GetFlightPlanData().GetRoute();
+	const char* directTo = fp.GetControllerAssignedData().GetDirectToPointName();
+	int altitude = rt.GetPosition().GetPressureAltitude();
+	int vs = rt.GetVerticalSpeed() / 200;
+	int cfl = fp.GetControllerAssignedData().GetClearedAltitude();
+	
+	NextSectorStructure nextSector = NextSectorStructure{};
+
+	// If a direct is set check for it first
+	if (directTo != NULL && directTo != "") {
+		for (auto& sector : sectorDefinition.at("Arrivals")) {
+			for (const auto& i : sector.at("icaos")) {
+				if (i == icaoArr) {
+					for (const auto& d : sector.at("directs")) {
+						if (d == directTo) {
+							nextSector.clbDesc = (sector.at("vs") == "clb") ? 1 : (sector.at("vs") == "") ? -1 : 0;
+							nextSector.nextSectorId = sector.at("toSector");
+							nextSector.copAltitude = sector.at("level");
+							nextSector.copn = d;
+							return nextSector;
+						}
+					}
+				}
+			}
+		}
+		for (auto& sector : sectorDefinition.at("Departures")) {
+			for (const auto& i : sector.at("icaos")) {
+				if (i == icaoDep) {
+					for (const auto& d : sector.at("directs")) {
+						if (d == directTo) {
+							nextSector.clbDesc = (sector.at("vs") == "clb") ? 1 : (sector.at("vs") == "") ? -1 : 0;
+							nextSector.nextSectorId = sector.at("toSector");
+							nextSector.copAltitude = sector.at("level");
+							nextSector.copn = d;
+							return nextSector;
+						}
+					}
+				}
+			}
+		}
+	}
+
+	// If it is not a direct
+	// We have to go through the route and find the COP
+	std::regex regex("[\\s]+");
+	std::vector<std::string> routeParts = Tokenize(filedRoute, regex);
+	for (auto& sector : sectorDefinition.at("Arrivals")) {
+		for (const auto& i : sector.at("icaos")) {
+			if (i == icaoArr) {
+				for (const auto& c : sector.at("cops")) {
+					for(const auto& r : routeParts){
+						if (r == c){
+							nextSector.clbDesc = (sector.at("vs") == "clb") ? 1 : (sector.at("vs") == "") ? -1 : 0;
+							nextSector.nextSectorId = sector.at("toSector");
+							nextSector.copAltitude = sector.at("level");
+							nextSector.copn = c;
+							return nextSector;
+						}
+					}
+				}
+			}
+		}
+	}
+	for (auto& sector : sectorDefinition.at("Departures")) {
+		for (const auto& i : sector.at("icaos")) {
+			if (i == icaoDep) {
+				for (const auto& c : sector.at("cops")) {
+					for (const auto& r : routeParts) {
+						if (r == c) {
+							nextSector.clbDesc = (sector.at("vs") == "clb") ? 1 : (sector.at("vs") == "") ? -1 : 0;
+							nextSector.nextSectorId = sector.at("toSector");
+							nextSector.copAltitude = sector.at("level");
+							nextSector.copn = c;
+							return nextSector;
+						}
+					}
+				}
+			}
+		}
+	}
+
+	if (nextSector.nextSectorId.size() > 0) {
+		nextSector.nextSectorId = ControllerSelectByPositionId(nextSector.nextSectorId.c_str()).GetPositionId();
+		nextSector.isValid = true;
+	}
+
+	return nextSector;
 }
