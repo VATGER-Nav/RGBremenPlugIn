@@ -435,7 +435,73 @@
     ]
   },
   "DST": {
-    "Arrivals": [],
-    "Departures": []
+    "Arrivals": [
+      {
+        "icaos": [ "EDWE", "EDWF", "EDWI" ],
+        "cops": [ "ROBEG" ],
+        "level": 24000,
+        "vs": "",
+        "directs": [],
+        "toSector": "EMS"
+      },
+      {
+        "icaos": [ "EDDV" ],
+        "cops": [ "ROBEG" ],
+        "level": 11000,
+        "vs": "desc",
+        "directs": [],
+        "toSector": "HAN"
+      },
+      {
+        "icaos": [ "EDDV" ],
+        "cops": [ "UMKUK" ],
+        "level": 11000,
+        "vs": "desc",
+        "directs": [],
+        "toSector": "HAN"
+      },
+      {
+        "icaos": [ "ETNW", "ETHB" ],
+        "cops": [ "ROBEG" ],
+        "level": 11000,
+        "vs": "desc",
+        "directs": [],
+        "toSector": "HAN"
+      },
+      {
+        "icaos": [ "EDVW" ],
+        "cops": [ "SOVIP", "NORTA" ],
+        "level": 16000,
+        "vs": "",
+        "directs": [],
+        "toSector": "HRZ"
+      }
+    ],
+    "Departures": [
+      {
+        "icaos": [ "EDLP", "EDVK", "EDFQ" ],
+        "cops": [ "ROBEG" ],
+        "level": 0,
+        "vs": "",
+        "directs": [],
+        "toSector": "EMS"
+      },
+      {
+        "icaos": [ "EDDV" ],
+        "cops": [ "WERRA" ],
+        "level": 24000,
+        "vs": "",
+        "directs": [],
+        "toSector": "HRZ"
+      },
+      {
+        "icaos": [ "EDDK", "EDDL", "EDLW" ],
+        "cops": [ "LUXUX", "MIPDU" ],
+        "level": 23000,
+        "vs": "",
+        "directs": [],
+        "toSector": "HRZ"
+      }
+    ]
   }
 }

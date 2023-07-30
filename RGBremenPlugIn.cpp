@@ -222,7 +222,9 @@ RGBremenPlugIn::RGBremenPlugIn() : EuroScopePlugIn::CPlugIn(
 	unreliableIASColor(nullptr),
 	unreliableMachIndicator("DMACH"),
 	unreliableMachColor(nullptr),
-	broadcastUnreliableSpeed(true)
+	broadcastUnreliableSpeed(true),
+	nextSectorUpdateInterval(3),
+	nextSectorUpdateHandler(nullptr)
 {
 	std::string pluginName = RG_BREMEN_PLUGIN_NAME;
 	std::string version = RG_BREMEN_PLUGIN_VERSION;
@@ -242,6 +244,11 @@ RGBremenPlugIn::RGBremenPlugIn() : EuroScopePlugIn::CPlugIn(
 
 	// Load LoA Definition
 	m_LoaDefinition = new LetterOfAgreement::LoaDefinition();
+	if (m_LoaDefinition != nullptr) {
+		if (nextSectorUpdateHandler == nullptr && nextSectorUpdateInterval.count() > 0) {
+			nextSectorUpdateHandler = new Threading::PeriodicAction(std::chrono::milliseconds(0), std::chrono::milliseconds(this->weatherUpdateInterval), std::bind(&RGBremenPlugIn::UpdateNextSectorPredictionForAllAircraft, this));
+		}
+	}
 
 	DisplayUserMessage(pluginName.c_str(), "Initialisation", ("Version " + version + " loaded").c_str(), true, false, false, false, false);
 }
@@ -262,6 +269,9 @@ RGBremenPlugIn::~RGBremenPlugIn()
 {
 	// Stop Weather Update Handler
 	this->StopWeatherUpdater();
+	// Stop next sector calculation
+	if(nextSectorUpdateHandler != nullptr)
+		nextSectorUpdateHandler->Stop();
 	// Clear Tag Handler
 	delete m_TagHandler;
 	// Clear Sid Star Handler
@@ -318,6 +328,8 @@ void RGBremenPlugIn::OnFlightPlanFlightStripPushed(EuroScopePlugIn::CFlightPlan 
 	if (strcmp(sTargetController, this->ControllerMyself().GetCallsign()) == 0) {
 		// Tag is pushed towards us
 		this->CheckFlightStripAnnotations(FlightPlan);
+		// Update next sector prediction once for this flight
+		calculatedNextSectors.emplace(FlightPlan.GetCallsign(), CalculateNextSector(FlightPlan, FlightPlan.GetCorrelatedRadarTarget()));
 	}
 }
 
@@ -455,7 +467,18 @@ void RGBremenPlugIn::OnGetTagItem(EuroScopePlugIn::CFlightPlan FlightPlan, EuroS
 	}
 
 	// Handle Next Sector Preview
-	NextSectorStructure nss = CalculateNextSector(FlightPlan, RadarTarget);
+	//NextSectorStructure nss = CalculateNextSector(FlightPlan, RadarTarget);
+	NextSectorStructure nss;
+	for (auto const& [cs, ns] : calculatedNextSectors) {
+		if (cs == FlightPlan.GetCallsign() && cs == RadarTarget.GetCallsign()) {
+			nss = ns;
+		}
+	}
+	if (nss.isValid && m_Config->GetDebugMode()) {
+		std::stringstream ss;
+		ss << RadarTarget.GetCallsign() << ": " << nss.copn << " @A" << nss.copAltitude << (nss.clbDesc < 0) ? "|" : (nss.clbDesc > 0) ? "^" : "-";
+		LogDebugMessage(ss.str(), "LoA");
+	}
 	switch (ItemCode)
 	{
 	case RG_BREMEN_TAG_ITEM_NEXT_SECTOR:
@@ -469,6 +492,13 @@ void RGBremenPlugIn::OnGetTagItem(EuroScopePlugIn::CFlightPlan FlightPlan, EuroS
 		if (nss.isValid) {
 			std::stringstream ss;
 			ss << "@FL" << nss.copAltitude / 1000 << (nss.clbDesc > 0) ? "^" : (nss.clbDesc < 0) ? "|" : "-";
+			strncpy_s(sItemString, 15, ss.str().c_str(), 15);
+		}
+		break;
+	case RG_BREMEN_TAG_ITEM_COPX:
+		if (nss.isValid) {
+			std::stringstream ss;
+			ss << nss.copn;
 			strncpy_s(sItemString, 15, ss.str().c_str(), 15);
 		}
 		break;
@@ -600,6 +630,8 @@ void RGBremenPlugIn::OnFunctionCall(int FunctionId, const char* sItemString, POI
 
 void RGBremenPlugIn::OnTimer(int Counter)
 {
+	if (Counter >= INT32_MAX - 1) return;
+
 	if (Counter % 60 == 0) {
 		m_TagHandler->SetTransitionAltitude(GetTransitionAltitude());
 	}
@@ -1056,19 +1088,28 @@ void RGBremenPlugIn::ResetWeatherUpdater()
 	this->CheckLoginState();
 }
 
+void RGBremenPlugIn::UpdateNextSectorPredictionForAllAircraft()
+{
+	for (EuroScopePlugIn::CFlightPlan fp = this->FlightPlanSelectFirst(); fp.IsValid(); fp = this->FlightPlanSelectNext(fp)) {
+		calculatedNextSectors.emplace(fp.GetCallsign(), this->CalculateNextSector(fp, fp.GetCorrelatedRadarTarget()));
+	}
+}
+
 NextSectorStructure RGBremenPlugIn::CalculateNextSector(const EuroScopePlugIn::CFlightPlan& fp, const EuroScopePlugIn::CRadarTarget& rt)
 {
 	if (!fp.IsValid() || !rt.IsValid()) return NextSectorStructure{};
 
-	//const char* sectorId = ControllerMyself().GetPositionId();
-	const char* sectorId = "DST"; // FOR DEBUGING
+	const char* sectorId = ControllerMyself().GetPositionId();
+	//const char* sectorId = "DST"; // FOR DEBUGING
 
 	nlohmann::json sectorDefinition = this->m_LoaDefinition->GetSectorDefinition(sectorId);
-	if (sectorDefinition == nullptr) return NextSectorStructure{};
-
-	if (m_Config->GetDebugMode()) {
-		LogMessage("Found sector definition for active sector", "LoA Definition");
+	if (sectorDefinition.size() < 1) {
+		return;
 	}
+
+	/*if (m_Config->GetDebugMode()) {
+		LogMessage("Found sector definition for active sector", "LoA Definition");
+	}*/
 
 	std::string icaoDep, icaoArr = "";
 	icaoDep = fp.GetFlightPlanData().GetOrigin();
@@ -1167,7 +1208,11 @@ NextSectorStructure RGBremenPlugIn::CalculateNextSector(const EuroScopePlugIn::C
 	}
 
 	if (nextSector.nextSectorId.size() > 0) {
-		nextSector.nextSectorId = ControllerSelectByPositionId(nextSector.nextSectorId.c_str()).GetPositionId();
+		//nextSector.nextSectorId = ControllerSelectByPositionId(nextSector.nextSectorId.c_str()).GetPositionId();
+		EuroScopePlugIn::CController nc = ControllerSelectByPositionId(nextSector.nextSectorId.c_str());
+		if (nc.IsValid() && nc.IsController()) {
+			nextSector.nextSectorId = nc.GetPositionId();
+		}
 		nextSector.isValid = true;
 	}
 

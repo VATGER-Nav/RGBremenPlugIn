@@ -60,6 +60,10 @@ private:
 	Weather::Weather weather;
 	Threading::PeriodicAction* weatherUpdateHandler;
 
+	std::unordered_map<std::string, NextSectorStructure> calculatedNextSectors;
+	Threading::PeriodicAction* nextSectorUpdateHandler;
+	std::chrono::minutes nextSectorUpdateInterval;
+
 	int loginState;
 
 	void InitializeTagItemHandler(std::string& pluginName);
@@ -96,6 +100,7 @@ private:
 	void StopWeatherUpdater();
 	void ResetWeatherUpdater();
 
+	void UpdateNextSectorPredictionForAllAircraft();
 	NextSectorStructure CalculateNextSector(const EuroScopePlugIn::CFlightPlan& fp, const EuroScopePlugIn::CRadarTarget& rt);
 public:
 	RGBremenPlugIn();

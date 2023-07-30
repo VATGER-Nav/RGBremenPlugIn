@@ -11,8 +11,11 @@ LetterOfAgreement::LoaDefinition::LoaDefinition()
 	m_workingDirectory = dir.substr(0, dir.find_last_of("\\/"));
 
 	// Then we can read the configuration file
-	std::ifstream f(m_workingDirectory + "/RG Bremen.json");
+	std::ifstream f(m_workingDirectory + "/RG Bremen Loa.json");
 	m_loaDefinition = nlohmann::json::parse(f);
+	if (f) {
+		f.close();
+	}
 }
 
 LetterOfAgreement::LoaDefinition::~LoaDefinition()
