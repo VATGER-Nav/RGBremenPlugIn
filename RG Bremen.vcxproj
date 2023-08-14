@@ -148,6 +148,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Airspeed\TrueAirspeed.h" />
     <ClInclude Include="Calculation\Calculations.h" />
     <ClInclude Include="Calculation\Haversine.h" />
     <ClInclude Include="Configuration\Config.h" />
@@ -170,6 +171,7 @@
     <ClInclude Include="Weather\Weather.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Airspeed\TrueAirspeed.cpp" />
     <ClCompile Include="Calculation\Calculations.cpp" />
     <ClCompile Include="Calculation\Haversine.cpp" />
     <ClCompile Include="Configuration\Config.cpp" />

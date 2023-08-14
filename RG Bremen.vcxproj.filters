@@ -75,6 +75,9 @@
     <ClInclude Include="LoA\NextSectorStructure.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Airspeed\TrueAirspeed.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="RGBremenPlugIn.cpp">
@@ -114,6 +117,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="LoA\LoaDefinition.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Airspeed\TrueAirspeed.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
