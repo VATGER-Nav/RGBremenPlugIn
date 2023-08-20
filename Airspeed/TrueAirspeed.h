@@ -13,7 +13,8 @@
 #include <wtypes.h>
 #include <windows.h>
 
-#include "EuroScopePlugIn.h"
+#include <EuroScopePlugIn.h>
+
 #include "../Configuration/Defines.h"
 #include "../Configuration/Config.h"
 #include "../lib/Helpers.h"
@@ -38,6 +39,7 @@ public:
 	std::string unreliableMachIndicator;
 	COLORREF* unreliableMachColor;
 	bool broadcastUnreliableSpeed;
+	std::vector<std::string> messageMap = {};
 
 	std::unordered_map<std::string, int> reportedIAS;
 	std::unordered_set<std::string> calculatedIASToggled;

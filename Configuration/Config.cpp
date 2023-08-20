@@ -122,3 +122,26 @@ nlohmann::json Config::GetAirspeedConfiguration()
 	}
 	
 }
+
+nlohmann::json Config::GetFlightPlanConfiguration()
+{
+	try
+	{
+		return m_configData.at("flightplan");
+	}
+	catch (const std::exception&)
+	{
+		return nlohmann::json::parse(R"(
+			{
+				"settings": {
+					"assignNAP": false,
+					"autoProcess" :  false,
+					"warnRFLBelowCFL": false,
+					"logMinMaxRFL": false,
+					"checkMinMaxRFL" :  false
+				},
+				"airports": {},
+				"routing": {}
+			})");
+	}
+}

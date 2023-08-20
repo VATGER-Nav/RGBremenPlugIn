@@ -18,6 +18,7 @@ TrueAirspeed::TrueAirspeed(Config* m_Config):
 	airspeedConfiguration = m_Config->GetAirspeedConfiguration();
 	if (airspeedConfiguration == nullptr) {
 		//LogMessage("Airspeed configuration not loaded. Please check RG Bremen.json file for the corresponding section.", "Configuration");
+		messageMap.push_back("Airspeed configuration not loaded. Please check RG Bremen.json file for the corresponding section.");
 		return;
 	}
 
@@ -27,6 +28,7 @@ TrueAirspeed::TrueAirspeed(Config* m_Config):
 		int machDigits = machCfg.value<int>("digits", this->machDigits);
 		if (machDigits < MIN_MACH_DIGITS || machDigits > MAX_MACH_DIGITS) {
 			//LogMessage("Invalid digit count for mach numbers. Must be between 1 and 13, falling back to default (2)", "Configuration");
+			messageMap.push_back("Invalid digit count for mach numbers. Must be between 1 and 13, falling back to default (2)");
 		}
 		else {
 			this->machDigits = machDigits;
@@ -34,6 +36,7 @@ TrueAirspeed::TrueAirspeed(Config* m_Config):
 		int machThresholdFL = machCfg.value<int>("thresholdFL", this->machThresholdFL);
 		if (machThresholdFL < 0) {
 			//LogMessage("Invalid mach threshold flight level. Must be greater than 0, falling back to default (245)", "Configuration");
+			messageMap.push_back("Invalid mach threshold flight level. Must be greater than 0, falling back to default (245)");
 		}
 		else {
 			this->machThresholdFL = machThresholdFL * 100;
@@ -41,9 +44,10 @@ TrueAirspeed::TrueAirspeed(Config* m_Config):
 
 		std::string prefixMach = machCfg.value<std::string>("prefix", this->prefixMach);
 		if (prefixMach.size() > (size_t)(TAG_ITEM_MAX_CONTENT_LENGTH - this->machDigits)) {
-			/*std::ostringstream msg;
+			std::ostringstream msg;
 			msg << "Mach number prefix is too long, must be " << (TAG_ITEM_MAX_CONTENT_LENGTH - this->machDigits) << " characters or less. Falling back to default (" << this->prefixMach << ")";
-			LogMessage(msg.str(), "Configuration");*/
+			//LogMessage(msg.str(), "Configuration");
+			messageMap.push_back(msg.str());
 		}
 		else {
 			this->prefixMach = prefixMach;
@@ -51,9 +55,10 @@ TrueAirspeed::TrueAirspeed(Config* m_Config):
 
 		std::string unreliableMachIndicator = machCfg.value<std::string>("unreliableIndicator", this->unreliableMachIndicator);
 		if (unreliableMachIndicator.size() > (size_t)(TAG_ITEM_MAX_CONTENT_LENGTH)) {
-			/*std::ostringstream msg;
+			std::ostringstream msg;
 			msg << "Unreliable Mach number indicator is too long, must be " << TAG_ITEM_MAX_CONTENT_LENGTH << " characters or less. Falling back to default (" << this->unreliableMachIndicator << ")";
-			LogMessage(msg.str(), "Configuration");*/
+			//LogMessage(msg.str(), "Configuration");
+			messageMap.push_back(msg.str());
 		}
 		else {
 			this->unreliableMachIndicator = unreliableMachIndicator;
@@ -64,6 +69,7 @@ TrueAirspeed::TrueAirspeed(Config* m_Config):
 			this->unreliableMachColor = parseRGBString(unreliableMachColor);
 			if (this->unreliableMachColor == nullptr) {
 				//LogMessage("Unreliable Mach number color is invalid, must be in comma-separated integer RGB format (e.g. \"123,123,123\"). Falling back to no color", "Configuration");
+				messageMap.push_back("Unreliable Mach number color is invalid, must be in comma-separated integer RGB format (e.g. \"123,123,123\"). Falling back to no color");
 			}
 		}
 	}
@@ -71,6 +77,7 @@ TrueAirspeed::TrueAirspeed(Config* m_Config):
 	{
 		if (m_Config->GetDebugMode()) {
 			//LogMessage("Unable to parse 'MACH' section of airspeed configuration.", "Configuration");
+			messageMap.push_back("Unable to parse 'MACH' section of airspeed configuration.");
 		}
 	}
 
@@ -80,9 +87,10 @@ TrueAirspeed::TrueAirspeed(Config* m_Config):
 
 		std::string prefixIAS = iasCfg.value<std::string>("prefix", this->prefixIAS);
 		if (prefixIAS.size() > (size_t)(TAG_ITEM_MAX_CONTENT_LENGTH - this->machDigits)) {
-			/*std::ostringstream msg;
+			std::ostringstream msg;
 			msg << "Indicated air speed prefix is too long, must be " << (TAG_ITEM_MAX_CONTENT_LENGTH - this->machDigits) << " characters or less. Falling back to default (" << this->prefixIAS << ")";
-			LogMessage(msg.str(), "Configuration");*/
+			//LogMessage(msg.str(), "Configuration");
+			messageMap.push_back(msg.str());
 		}
 		else {
 			this->prefixIAS = prefixIAS;
@@ -90,9 +98,10 @@ TrueAirspeed::TrueAirspeed(Config* m_Config):
 
 		std::string unreliableIASIndicator = iasCfg.value<std::string>("unreliableIndicator", this->unreliableIASIndicator);
 		if (unreliableIASIndicator.size() > (size_t)(TAG_ITEM_MAX_CONTENT_LENGTH)) {
-			/*std::ostringstream msg;
+			std::ostringstream msg;
 			msg << "Unreliable IAS indicator is too long, must be " << TAG_ITEM_MAX_CONTENT_LENGTH << " characters or less. Falling back to default (" << this->unreliableIASIndicator << ")";
-			this->LogMessage(msg.str(), "Configuration");*/
+			/*this->LogMessage(msg.str(), "Configuration");*/
+			messageMap.push_back(msg.str());
 		}
 		else {
 			this->unreliableIASIndicator = unreliableIASIndicator;
@@ -103,6 +112,7 @@ TrueAirspeed::TrueAirspeed(Config* m_Config):
 			this->unreliableIASColor = parseRGBString(unreliableIASColor);
 			if (this->unreliableIASColor == nullptr) {
 				//this->LogMessage("Unreliable IAS color is invalid, must be in comma-separated (integer) RGB format (e.g. \"123,123,123\"). Falling back to no color", "Configuration");
+				messageMap.push_back("Unreliable IAS color is invalid, must be in comma-separated (integer) RGB format (e.g. \"123,123,123\"). Falling back to no color");
 			}
 		}
 	}
@@ -110,6 +120,7 @@ TrueAirspeed::TrueAirspeed(Config* m_Config):
 	{
 		if (m_Config->GetDebugMode()) {
 			//LogMessage("Unable to parse 'IAS' section of airspeed configuration.", "Configuration");
+			messageMap.push_back("Unable to parse 'IAS' section of airspeed configuration.");
 		}
 	}
 
@@ -126,6 +137,7 @@ TrueAirspeed::TrueAirspeed(Config* m_Config):
 	{
 		if (m_Config->GetDebugMode()) {
 			//LogMessage("Unable to parse 'Weather' section of airspeed configuration.", "Configuration");
+			messageMap.push_back("Unable to parse 'Weather' section of airspeed configuration.");
 		}
 	}
 
@@ -135,10 +147,11 @@ TrueAirspeed::TrueAirspeed(Config* m_Config):
 
 		this->broadcastUnreliableSpeed = broadcastCfg.value<bool>("unreliableSpeed", this->broadcastUnreliableSpeed);
 	}
-	catch (const std::exception&)
+	catch (const std::exception& e)
 	{
 		if (m_Config->GetDebugMode()) {
 			//LogMessage("Unable to parse 'Broadcast' section of airspeed configuration.", "Configuration");
+			messageMap.push_back("Unable to parse 'Broadcast' section of airspeed configuration.");
 		}
 	}
 }

@@ -2,7 +2,7 @@
 //
 
 #include "stdafx.h"
-#include "EuroScopePlugIn.h"
+#include <EuroScopePlugIn.h>
 #include "RGBremenPlugIn.h"
 
 RGBremenPlugIn  * gpMyPlugin = NULL;

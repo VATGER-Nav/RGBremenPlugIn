@@ -153,6 +153,13 @@
     <ClInclude Include="Calculation\Haversine.h" />
     <ClInclude Include="Configuration\Config.h" />
     <ClInclude Include="Configuration\Defines.h" />
+    <ClInclude Include="FlightPlan\Airport.h" />
+    <ClInclude Include="FlightPlan\DeliveryHelper.h" />
+    <ClInclude Include="FlightPlan\FlightPlan.h" />
+    <ClInclude Include="FlightPlan\RouteEntry.h" />
+    <ClInclude Include="FlightPlan\Routing.h" />
+    <ClInclude Include="FlightPlan\Sid.h" />
+    <ClInclude Include="FlightPlan\Validation.h" />
     <ClInclude Include="Http\Http.h" />
     <ClInclude Include="lib\Helpers.h" />
     <ClInclude Include="LoA\LoaDefinition.h" />
@@ -176,6 +183,10 @@
     <ClCompile Include="Calculation\Haversine.cpp" />
     <ClCompile Include="Configuration\Config.cpp" />
     <ClCompile Include="DLLexport.cpp" />
+    <ClCompile Include="FlightPlan\DeliveryHelper.cpp" />
+    <ClCompile Include="FlightPlan\FlightPlan.cpp" />
+    <ClCompile Include="FlightPlan\RouteEntry.cpp" />
+    <ClCompile Include="FlightPlan\Routing.cpp" />
     <ClCompile Include="Http\Http.cpp" />
     <ClCompile Include="LoA\LoaDefinition.cpp" />
     <ClCompile Include="RGBremenPlugIn.cpp" />
@@ -191,6 +202,7 @@
       <DeploymentContent>true</DeploymentContent>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</ExcludedFromBuild>
       <FileType>Document</FileType>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
     </CopyFileToFolders>
   </ItemGroup>
   <ItemGroup>
@@ -198,6 +210,8 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</ExcludedFromBuild>
       <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</DeploymentContent>
       <FileType>Document</FileType>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</DeploymentContent>
     </CopyFileToFolders>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

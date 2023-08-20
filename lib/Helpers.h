@@ -119,3 +119,21 @@ inline std::string toLowercase(std::string str) {
 	std::transform(str.begin(), str.end(), str.begin(), [](unsigned char c) {return std::tolower(c); });
 	return str;
 }
+
+inline std::string join(const std::vector<std::string>& s, const char delim = ' ')
+{
+	std::ostringstream ss;
+	std::copy(s.begin(), s.end(), std::ostream_iterator<std::string>(ss, &delim));
+	return ss.str();
+}
+
+inline bool startsWith(const std::string& str, const std::string& pre)
+{
+	return str.rfind(pre, 0) == 0;
+}
+
+inline void toUppercase(std::string& str)
+{
+	std::transform(str.begin(), str.end(), str.begin(),
+		[](unsigned char c) -> unsigned char { return std::toupper(c); });
+}

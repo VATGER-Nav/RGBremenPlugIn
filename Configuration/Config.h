@@ -40,5 +40,7 @@ public:
 	std::array<int, 4> GetTagColorTWR();
 	// Weather config
 	nlohmann::json GetAirspeedConfiguration();
+	// FlightPlan config
+	nlohmann::json GetFlightPlanConfiguration();
 };
 

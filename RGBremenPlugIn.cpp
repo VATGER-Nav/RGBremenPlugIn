@@ -1,6 +1,5 @@
 #include "stdafx.h"
 #include "RGBremenPlugIn.h"
-#include <string>
 
 void RGBremenPlugIn::InitializeTagItemHandler(std::string& pluginName)
 {
@@ -74,6 +73,13 @@ void RGBremenPlugIn::InitializeAirspeedHandler()
 	this->RegisterTagItemFunction("TAG FUNC / Toggle unreliable speed", RG_BREMEN_TAG_ITEM_FUNC_TOGGLE_UNRELIABLE_SPEED);
 
 	m_AirspeedHandler = new TrueAirspeed(m_Config);
+	if (m_AirspeedHandler->messageMap.size() > 0) {
+		for (int i = 0; i < m_AirspeedHandler->messageMap.size(); i++) {
+			LogMessage(m_AirspeedHandler->messageMap.at(i), "AirSpeedHandler");
+		}
+		m_AirspeedHandler->messageMap.clear();
+	}
+	LogMessage("AirSpeedHandler initialized", "AirSpeedHandler");
 }
 
 RGBremenPlugIn::RGBremenPlugIn() : EuroScopePlugIn::CPlugIn(
@@ -104,6 +110,16 @@ RGBremenPlugIn::RGBremenPlugIn() : EuroScopePlugIn::CPlugIn(
 
 	// Load LoA Definition
 	m_LoaDefinition = new LetterOfAgreement::LoaDefinition();
+	LogMessage("Loaded LoA", "Next Sector Prediction");
+
+	// Init DeliveryHelper
+	this->RegisterTagItemType("LIST / Flightplan Validation", RG_BREMEN_LIST_ITEM_FLIGHTPLAN_VALIDATION);
+	this->RegisterTagItemFunction("LIST FUNC / Validation menu", RG_BREMEN_LIST_ITEM_FUNC_FLIGHTPLAN_VALIDATION_MENU);
+	this->RegisterTagItemFunction("LIST FUNC / Process FPL", RG_BREMEN_LIST_ITEM_FUNC_FLIGHTPLAN_PROCESS_FP);
+	this->RegisterTagItemFunction("LIST FUNC / Process FPL (non-NAP)", RG_BREMEN_LIST_ITEM_FUNC_FLIGHTPLAN_PROCESS_FP_NON_NAP);
+	this->RegisterTagItemFunction("LIST FUNC / Process FPL (NAP)", RG_BREMEN_LIST_ITEM_FUNC_FLIGHTPLAN_PROCESS_FP_NAP);
+	LogDebugMessage("Registered LIST FUNCs for DelHel", "DelHel");
+	m_DelHel = new DeliveryHelper(m_Config);
 
 	DisplayUserMessage(pluginName.c_str(), "Initialisation", ("Version " + version + " loaded").c_str(), true, false, false, false, false);
 }
@@ -122,6 +138,8 @@ void RGBremenPlugIn::LogDebugMessage(std::string msg, std::string channel)
 
 RGBremenPlugIn::~RGBremenPlugIn()
 {
+	// Remove DelHel
+	delete m_DelHel;
 	// Stop Weather Update Handler
 	m_AirspeedHandler->StopWeatherUpdater();
 	delete m_AirspeedHandler;
@@ -139,6 +157,13 @@ RGBremenPlugIn::~RGBremenPlugIn()
 
 void RGBremenPlugIn::OnAirportRunwayActivityChanged()
 {
+	// Make sure current sector file is selected
+	if (m_DelHel != nullptr) {
+		this->SelectActiveSectorfile();
+		for (auto sfe = this->SectorFileElementSelectFirst(EuroScopePlugIn::SECTOR_ELEMENT_RUNWAY); sfe.IsValid(); sfe = this->SectorFileElementSelectNext(sfe, EuroScopePlugIn::SECTOR_ELEMENT_RUNWAY)) {
+			m_DelHel->UpdateActiveAirports(sfe);
+		}
+	}
 }
 
 void RGBremenPlugIn::OnControllerPositionUpdate(EuroScopePlugIn::CController Controller)
@@ -155,6 +180,8 @@ void RGBremenPlugIn::OnRadarTargetPositionUpdate(EuroScopePlugIn::CRadarTarget R
 
 void RGBremenPlugIn::OnFlightPlanDisconnect(EuroScopePlugIn::CFlightPlan FlightPlan)
 {
+	if(m_DelHel != nullptr)
+		m_DelHel->FlightPlanClosed(FlightPlan);
 }
 
 void RGBremenPlugIn::OnFlightPlanFlightPlanDataUpdate(EuroScopePlugIn::CFlightPlan FlightPlan)
@@ -296,6 +323,37 @@ void RGBremenPlugIn::OnGetTagItem(EuroScopePlugIn::CFlightPlan FlightPlan, EuroS
 				*pRGB = RGB(m_Config->GetListColorSidStarNo()[0], m_Config->GetListColorSidStarNo()[1], m_Config->GetListColorSidStarNo()[2]);
 			}
 			strcpy_s(sItemString, 16, "NO");
+		}
+		return;
+	}
+	if (ItemCode == RG_BREMEN_LIST_ITEM_FLIGHTPLAN_VALIDATION && m_DelHel != nullptr) {
+		Validation v = m_DelHel->ProcessFlightPlan(FlightPlan, false, true);
+		if (v.valid && m_DelHel->IsFlightPlanProcessed(FlightPlan)) {
+			if (v.tag.empty()) {
+				strcpy_s(sItemString, 16, "OK");
+			}
+			else
+			{
+				strcpy_s(sItemString, 16, v.tag.c_str());
+			}
+
+			*pColorCode = EuroScopePlugIn::TAG_COLOR_RGB_DEFINED;
+
+			if (v.color == RGB(200, 200, 200)) {
+				*pRGB = RGB(0, 200, 0);
+			}
+			else {
+				*pRGB = v.color;
+			}
+		}
+		else
+		{
+			strcpy_s(sItemString, 16, v.tag.c_str());
+
+			if (v.color != RGB(200, 200, 200)) {
+				*pColorCode = EuroScopePlugIn::TAG_COLOR_RGB_DEFINED;
+				*pRGB = v.color;
+			}
 		}
 		return;
 	}

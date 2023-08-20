@@ -27,6 +27,7 @@
 #include "Airspeed/TrueAirspeed.h"
 #include "LoA/LoaDefinition.h"
 #include "LoA/NextSectorStructure.h"
+#include "FlightPlan/DeliveryHelper.h"
 
 class RGBremenPlugIn : public EuroScopePlugIn::CPlugIn
 {
@@ -41,6 +42,8 @@ private:
 	std::unordered_map<std::string, NextSectorStructure> calculatedNextSectors;
 	Threading::PeriodicAction* nextSectorUpdateHandler;
 	std::chrono::minutes nextSectorUpdateInterval;
+
+	DeliveryHelper* m_DelHel;
 
 	int loginState;
 
