@@ -121,6 +121,10 @@ RGBremenPlugIn::RGBremenPlugIn() : EuroScopePlugIn::CPlugIn(
 	LogDebugMessage("Registered LIST FUNCs for DelHel", "DelHel");
 	m_DelHel = new DeliveryHelper(m_Config);
 
+	while (m_DelHel->HasMessage()) {
+		LogDebugMessage(m_DelHel->GetNextMessage(), "DelHel");
+	}
+
 	DisplayUserMessage(pluginName.c_str(), "Initialisation", ("Version " + version + " loaded").c_str(), true, false, false, false, false);
 }
 
@@ -182,6 +186,7 @@ void RGBremenPlugIn::OnFlightPlanDisconnect(EuroScopePlugIn::CFlightPlan FlightP
 {
 	if(m_DelHel != nullptr)
 		m_DelHel->FlightPlanClosed(FlightPlan);
+	calculatedNextSectors.erase(FlightPlan.GetCallsign());
 }
 
 void RGBremenPlugIn::OnFlightPlanFlightPlanDataUpdate(EuroScopePlugIn::CFlightPlan FlightPlan)
@@ -385,6 +390,7 @@ void RGBremenPlugIn::OnGetTagItem(EuroScopePlugIn::CFlightPlan FlightPlan, EuroS
 			nss = ns;
 		}
 	}
+
 	switch (ItemCode)
 	{
 	case RG_BREMEN_TAG_ITEM_NEXT_SECTOR:
@@ -529,6 +535,20 @@ void RGBremenPlugIn::OnFunctionCall(int FunctionId, const char* sItemString, POI
 	case RG_BREMEN_TAG_ITEM_FUNC_TOGGLE_UNRELIABLE_SPEED:
 		m_AirspeedHandler->ToggleUnreliableSpeed(fp);
 		break;
+	case RG_BREMEN_LIST_ITEM_FUNC_FLIGHTPLAN_PROCESS_FP:
+		m_DelHel->ProcessFlightPlan(fp, false);
+		break;
+	case RG_BREMEN_LIST_ITEM_FUNC_FLIGHTPLAN_PROCESS_FP_NAP:
+		m_DelHel->ProcessFlightPlan(fp, true);
+		break;
+	case RG_BREMEN_LIST_ITEM_FUNC_FLIGHTPLAN_PROCESS_FP_NON_NAP:
+		m_DelHel->ProcessFlightPlan(fp, false);
+		break;
+	case RG_BREMEN_LIST_ITEM_FUNC_FLIGHTPLAN_VALIDATION_MENU:
+		this->OpenPopupList(Area, "Validation", 1);
+		this->AddPopupListElement("Process FPL (NAP)", NULL, RG_BREMEN_LIST_ITEM_FUNC_FLIGHTPLAN_PROCESS_FP_NAP, false, EuroScopePlugIn::POPUP_ELEMENT_NO_CHECKBOX, false, false);
+		this->AddPopupListElement("Process FPL (non-NAP)", NULL, RG_BREMEN_LIST_ITEM_FUNC_FLIGHTPLAN_PROCESS_FP_NON_NAP, false, EuroScopePlugIn::POPUP_ELEMENT_NO_CHECKBOX, false, false);
+		break;
 	default:
 		break;
 	}
@@ -564,6 +584,7 @@ void RGBremenPlugIn::CheckLoginState()
 	case EuroScopePlugIn::CONNECTION_TYPE_DIRECT:
 	case EuroScopePlugIn::CONNECTION_TYPE_VIA_PROXY:
 	case EuroScopePlugIn::CONNECTION_TYPE_SWEATBOX:
+	case EuroScopePlugIn::CONNECTION_TYPE_PLAYBACK:
 	{
 		m_AirspeedHandler->StartWeatherUpdater();
 		std::vector<EuroScopePlugIn::CFlightPlan> flightPlans;
@@ -571,6 +592,8 @@ void RGBremenPlugIn::CheckLoginState()
 			flightPlans.push_back(fp);
 		}
 		m_AirspeedHandler->CheckFlightStripAnnotationsForAllAircraft(flightPlans);
+
+		// LoA Next Sector Prediction
 		if (m_LoaDefinition != nullptr) {
 			if (nextSectorUpdateHandler == nullptr && nextSectorUpdateInterval.count() > 0) {
 				nextSectorUpdateHandler = new Threading::PeriodicAction(std::chrono::milliseconds(100), std::chrono::milliseconds(this->nextSectorUpdateInterval), std::bind(&RGBremenPlugIn::UpdateNextSectorPredictionForAllAircraft, this));
@@ -586,6 +609,10 @@ void RGBremenPlugIn::CheckLoginState()
 	}
 	default:
 		m_AirspeedHandler->StopWeatherUpdater();
+		if (nextSectorUpdateHandler != nullptr) {
+			nextSectorUpdateHandler->Stop();
+			calculatedNextSectors.clear();
+		}
 		break;
 	}
 }
@@ -593,8 +620,20 @@ void RGBremenPlugIn::CheckLoginState()
 void RGBremenPlugIn::UpdateNextSectorPredictionForAllAircraft()
 {
 	LogDebugMessage("Calculating next sectors", "LoA");
+	//calculatedNextSectors.clear();
 	for (EuroScopePlugIn::CFlightPlan fp = this->FlightPlanSelectFirst(); fp.IsValid(); fp = this->FlightPlanSelectNext(fp)) {
-		calculatedNextSectors.emplace(fp.GetCallsign(), this->CalculateNextSector(fp, fp.GetCorrelatedRadarTarget()));
+		NextSectorStructure nss = this->CalculateNextSector(fp, fp.GetCorrelatedRadarTarget());
+		if (nss.nextSectorId.size() > 0) {
+			nss.isValid = true;
+
+			calculatedNextSectors.emplace(fp.GetCallsign(), nss);
+
+			/*if (m_Config->GetDebugMode() && nss.isValid) {
+				std::stringstream ss;
+				ss << fp.GetCallsign() << " " << nss.nextSectorId << " " << nss.copn << " " << nss.copAltitude << " " << nss.clbDesc;
+				LogDebugMessage(ss.str(), "LoA");
+			}*/
+		}
 	}
 	std::stringstream ss;
 	ss << "Calculated next sectors for " << calculatedNextSectors.size() << " flightplans";
@@ -607,12 +646,8 @@ NextSectorStructure RGBremenPlugIn::CalculateNextSector(const EuroScopePlugIn::C
 	if (!fp.IsValid() || !rt.IsValid()) return NextSectorStructure{};
 
 	const char* sectorId = ControllerMyself().GetPositionId();
-	if(m_Config->GetDebugMode())
-		sectorId = "ALR"; // FOR DEBUGING
-
-	/*if (m_Config->GetDebugMode()) {
-		LogDebugMessage(sectorId, "LoA");
-	}*/
+	//if(m_Config->GetDebugMode())
+	//	sectorId = "ALR"; // FOR DEBUGING
 
 	std::vector<std::string> childSectors {};
 
@@ -635,7 +670,17 @@ NextSectorStructure RGBremenPlugIn::CalculateNextSector(const EuroScopePlugIn::C
 
 const NextSectorStructure RGBremenPlugIn::CalculateNextSectorById(const char* sectorId, const EuroScopePlugIn::CFlightPlan& fp, const EuroScopePlugIn::CRadarTarget& rt)
 {
-	nlohmann::json sectorDefinition = this->m_LoaDefinition->GetSectorDefinition(sectorId);
+	nlohmann::json sectorDefinition;
+	try
+	{
+		sectorDefinition = this->m_LoaDefinition->GetSectorDefinition(sectorId);
+	}
+	catch (const std::exception& e)
+	{
+		LogDebugMessage(e.what(), "Next Sector");
+		return NextSectorStructure{};
+	}
+
 	if (sectorDefinition.size() < 1) {
 		return NextSectorStructure{};
 	}
@@ -663,18 +708,57 @@ const NextSectorStructure RGBremenPlugIn::CalculateNextSectorById(const char* se
 
 	NextSectorStructure nextSector = NextSectorStructure{};
 
-	// If a direct is set check for it first
-	if (directTo != NULL && directTo != "") {
+	try {
+		// If a direct is set check for it first
+		if (directTo != NULL && directTo != "") {
+			for (auto& sector : sectorDefinition.at("Arrivals")) {
+				for (const auto& i : sector.at("icaos")) {
+					if (i == icaoArr) {
+						for (const auto& d : sector.at("directs")) {
+							if (d == directTo) {
+								nextSector.clbDesc = (sector.at("vs") == "clb") ? 1 : (sector.at("vs") == "desc") ? -1 : 0;
+								nextSector.nextSectorId = sector.at("toSector");
+								nextSector.copAltitude = sector.at("level");
+								nextSector.copn = d;
+								return nextSector;
+							}
+						}
+					}
+				}
+			}
+			for (auto& sector : sectorDefinition.at("Departures")) {
+				for (const auto& i : sector.at("icaos")) {
+					if (i == icaoDep) {
+						for (const auto& d : sector.at("directs")) {
+							if (d == directTo) {
+								nextSector.clbDesc = (sector.at("vs") == "clb") ? 1 : (sector.at("vs") == "desc") ? -1 : 0;
+								nextSector.nextSectorId = sector.at("toSector");
+								nextSector.copAltitude = sector.at("level");
+								nextSector.copn = d;
+								return nextSector;
+							}
+						}
+					}
+				}
+			}
+		}
+
+		// If it is not a direct
+		// We have to go through the route and find the COP
+		std::regex regex("[\\s]+");
+		std::vector<std::string> routeParts = Tokenize(filedRoute, regex);
 		for (auto& sector : sectorDefinition.at("Arrivals")) {
 			for (const auto& i : sector.at("icaos")) {
 				if (i == icaoArr) {
-					for (const auto& d : sector.at("directs")) {
-						if (d == directTo) {
-							nextSector.clbDesc = (sector.at("vs") == "clb") ? 1 : (sector.at("vs") == "") ? -1 : 0;
-							nextSector.nextSectorId = sector.at("toSector");
-							nextSector.copAltitude = sector.at("level");
-							nextSector.copn = d;
-							return nextSector;
+					for (const std::string& c : sector.at("cops")) {
+						for (const auto& r : routeParts) {
+							if (r == c) {
+								nextSector.clbDesc = (sector.at("vs") == "clb") ? 1 : (sector.at("vs") == "desc") ? -1 : 0;
+								nextSector.nextSectorId = sector.at("toSector");
+								nextSector.copAltitude = sector.at("level");
+								nextSector.copn = c;
+								return nextSector;
+							}
 						}
 					}
 				}
@@ -683,67 +767,23 @@ const NextSectorStructure RGBremenPlugIn::CalculateNextSectorById(const char* se
 		for (auto& sector : sectorDefinition.at("Departures")) {
 			for (const auto& i : sector.at("icaos")) {
 				if (i == icaoDep) {
-					for (const auto& d : sector.at("directs")) {
-						if (d == directTo) {
-							nextSector.clbDesc = (sector.at("vs") == "clb") ? 1 : (sector.at("vs") == "") ? -1 : 0;
-							nextSector.nextSectorId = sector.at("toSector");
-							nextSector.copAltitude = sector.at("level");
-							nextSector.copn = d;
-							return nextSector;
+					for (const std::string& c : sector.at("cops")) {
+						for (const auto& r : routeParts) {
+							if (r == c) {
+								nextSector.clbDesc = (sector.at("vs") == "clb") ? 1 : (sector.at("vs") == "desc") ? -1 : 0;
+								nextSector.nextSectorId = sector.at("toSector");
+								nextSector.copAltitude = sector.at("level");
+								nextSector.copn = c;
+								return nextSector;
+							}
 						}
 					}
 				}
 			}
 		}
 	}
-
-	// If it is not a direct
-	// We have to go through the route and find the COP
-	std::regex regex("[\\s]+");
-	std::vector<std::string> routeParts = Tokenize(filedRoute, regex);
-	for (auto& sector : sectorDefinition.at("Arrivals")) {
-		for (const auto& i : sector.at("icaos")) {
-			if (i == icaoArr) {
-				for (const std::string& c : sector.at("cops")) {
-					for (const auto& r : routeParts) {
-						if (r == c) {
-							nextSector.clbDesc = (sector.at("vs") == "clb") ? 1 : (sector.at("vs") == "") ? -1 : 0;
-							nextSector.nextSectorId = sector.at("toSector");
-							nextSector.copAltitude = sector.at("level");
-							nextSector.copn = c;
-							return nextSector;
-						}
-					}
-				}
-			}
-		}
+	catch (std::exception& e) {
+		LogDebugMessage(e.what(), "LoA");
 	}
-	for (auto& sector : sectorDefinition.at("Departures")) {
-		for (const auto& i : sector.at("icaos")) {
-			if (i == icaoDep) {
-				for (const std::string& c : sector.at("cops")) {
-					for (const auto& r : routeParts) {
-						if (r == c) {
-							nextSector.clbDesc = (sector.at("vs") == "clb") ? 1 : (sector.at("vs") == "") ? -1 : 0;
-							nextSector.nextSectorId = sector.at("toSector");
-							nextSector.copAltitude = sector.at("level");
-							nextSector.copn = c;
-							return nextSector;
-						}
-					}
-				}
-			}
-		}
-	}
-
-	if (nextSector.nextSectorId.size() > 0) {
-		//nextSector.nextSectorId = ControllerSelectByPositionId(nextSector.nextSectorId.c_str()).GetPositionId();
-		EuroScopePlugIn::CController nc = ControllerSelectByPositionId(nextSector.nextSectorId.c_str());
-		if (nc.IsValid() && nc.IsController()) {
-			nextSector.nextSectorId = nc.GetPositionId();
-		}
-		nextSector.isValid = true;
-	}
-
 	return nextSector;
 }

@@ -19,9 +19,14 @@ private:
 	bool warnRFLBelowCFL = false;
 	bool logMinMaxRFL = false;
 	bool checkMinMaxRFL = false;
+
+	std::vector<std::string> m_MessageMap;
 public:
 	DeliveryHelper(Config* config);
 	~DeliveryHelper();
+
+	std::string GetNextMessage();
+	bool HasMessage();
 
 	void ProcessAirportConfig();
 	void ProcessRoutingConfig();

@@ -10,93 +10,111 @@ DeliveryHelper::DeliveryHelper(Config* config) : m_Config(config)
 		warnRFLBelowCFL = j.at("warnRFLBelowCFL");
 		logMinMaxRFL = j.at("logMinMaxRFL");
 		checkMinMaxRFL = j.at("checkMinMaxRFL");
-
-		this->ProcessAirportConfig();
-		this->ProcessRoutingConfig();
 	}
 	catch (std::exception& ex) {
-
+		m_MessageMap.push_back("Failed loading flight plan configuration from flightplan.settings");
+		m_MessageMap.push_back(ex.what());
+		return;
 	}
+
+	this->ProcessAirportConfig();
+	this->ProcessRoutingConfig();
 }
 
 DeliveryHelper::~DeliveryHelper()
 {
 }
 
+std::string DeliveryHelper::GetNextMessage()
+{
+	if (m_MessageMap.size() > 0) {
+		std::string msg = m_MessageMap.at(0);
+		m_MessageMap.erase(m_MessageMap.begin());
+		return msg;
+	}
+	return "No message";
+}
+
+bool DeliveryHelper::HasMessage()
+{
+	return m_MessageMap.size() > 0;
+}
+
 void DeliveryHelper::ProcessAirportConfig()
 {
-	nlohmann::json j;
-	j = m_Config->GetFlightPlanConfiguration().at("airports");
+	try
+	{
+		nlohmann::json ja = m_Config->GetFlightPlanConfiguration().at("airports");
 
-	for (auto& [icao, jap] : j.items()) {
-		Airport ap{
-			icao, // icao
-			jap.value<int>("elevation", 0), // elevation
-			false, // active
-		};
-
-		nlohmann::json jss;
-		try {
-			jss = jap.at("sids");
-		}
-		catch (std::exception e)
-		{
-			//this->LogMessage("Failed to get SIDs for airport \"" + icao + "\". Error: " + std::string(e.what()), "Config");
-			continue;
-		}
-
-		for (auto& [wp, js] : jss.items()) {
-			Sid s{
-				wp, // wp
-				js.value<int>("cfl", 0) // cfl
+		for (auto& [icao, airportConfig] : ja.items()) {
+			m_MessageMap.push_back("Parsing airport " + icao);
+			Airport airport{
+				icao,
+				airportConfig.value<int>("elevation", 0),
+				false
 			};
 
-			nlohmann::json jrwys;
-			try {
-				jrwys = js.at("rwys");
-			}
-			catch (std::exception e)
+			// Handle sids
+			try
 			{
-				//this->LogMessage("Failed to get RWYs for SID \"" + wp + "\" for airport \"" + icao + "\". Error: " + std::string(e.what()), "Config");
-				continue;
-			}
+				nlohmann::json jas = airportConfig.at("sids");
 
-			std::ostringstream rrs;
-			rrs << icao << "\\/(";
-			for (auto it = jrwys.items().begin(); it != jrwys.items().end(); ++it) {
-				auto rwy = it.key();
-				nlohmann::json departures = it.value().value("dep", "[]");
-				auto naps = it.value().value<std::string>("nap", "");
-				auto prio = it.value().value<int>("prio", 0);
-
-				for (auto dit = departures.begin(); dit != departures.end(); ++dit) {
-					std::cout << dit.key() << " - " << dit.value();
-
-					SidInfo si{
-						rwy, // rwy
-						dit.value(), // dep
-						naps, // nap
-						prio // prio
+				for (auto& [waypoint, sidConfig] : jas.items()) {
+					Sid s{
+						waypoint,
+						sidConfig.value<int>("cfl", 0)
 					};
 
-					s.rwys.emplace(si.rwy, si);
-					ap.rwys.emplace(si.rwy, false);
+					try {
+						nlohmann::json jsrwys = sidConfig.at("rwys");
 
-					rrs << si.rwy;
-					if (std::next(it) != jrwys.items().end()) {
-						rrs << '|';
+						std::ostringstream rrs;
+						rrs << icao << "\\/(";
+
+						for (auto& [ident, rwyConfig] : jsrwys.items()) {
+							try
+							{
+								for (const auto& sid : rwyConfig.at("dep")) {
+									SidInfo si{
+										ident,
+										sid,
+										rwyConfig.value<std::string>("nap", ""),
+										rwyConfig.value<int>("prio", 0)
+									};
+									s.rwys.emplace(si.rwy, si);
+									airport.rwys.emplace(si.rwy, false);
+									rrs << si.rwy;
+								}
+								rrs << "|";
+							}
+							catch (const std::exception& e)
+							{
+								m_MessageMap.push_back(e.what());
+							}
+						}
+
+						rrs << ")";
+
+						airport.rwy_regex = std::regex(rrs.str(), std::regex_constants::ECMAScript);
+						airport.sids.emplace(waypoint, s);
+						
+					}
+					catch (const std::exception& e) {
+						m_MessageMap.push_back(e.what());
 					}
 				}
-
 			}
-			rrs << ')';
+			catch (const std::exception& e)
+			{
+				m_MessageMap.push_back(e.what());
+			}
 
-			ap.rwy_regex = std::regex(rrs.str(), std::regex_constants::ECMAScript);
-
-			ap.sids.emplace(wp, s);
+			this->m_Airports.emplace(icao, airport);
 		}
-
-		this->m_Airports.emplace(icao, ap);
+	}
+	catch (const std::exception& e)
+	{
+		m_MessageMap.push_back(e.what());
 	}
 }
 
@@ -227,7 +245,7 @@ Validation DeliveryHelper::ProcessFlightPlan(EuroScopePlugIn::CFlightPlan& fp, b
 
 	if (sid.wp == "" || route.size() == 0) {
 		if (!validateOnly) {
-			//this->LogMessage("Invalid flightplan, no valid SID waypoint found in route", cs);
+			m_MessageMap.push_back("Invalid flightplan, no valid SID waypoint found in route " + callsign);
 		}
 
 		v.valid = false;
@@ -265,12 +283,12 @@ Validation DeliveryHelper::ProcessFlightPlan(EuroScopePlugIn::CFlightPlan& fp, b
 	}
 	else {
 		if (!fpd.SetRoute(join(route).c_str())) {
-			//this->LogMessage("Failed to process flightplan, cannot set cleaned route", cs);
+			m_MessageMap.push_back("Failed to process flightplan, cannot set cleaned route " + callsign);
 			return v;
 		}
 
 		if (!fpd.AmendFlightPlan()) {
-			//this->LogMessage("Failed to process flightplan, cannot amend flightplan after setting cleaned route", cs);
+			m_MessageMap.push_back("Failed to process flightplan, cannot amend flightplan after setting cleaned route " + callsign);
 			return v;
 		}
 
