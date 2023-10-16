@@ -3,7 +3,7 @@
 #include <regex>
 
 #define RG_BREMEN_PLUGIN_NAME		"RG Bremen EuroScope PlugIn"
-#define RG_BREMEN_PLUGIN_VERSION	"2.0.0"
+#define RG_BREMEN_PLUGIN_VERSION	"2.0.1"
 #define RG_BREMEN_PLUGIN_DEVELOPER	"Sebastian Kramer"
 #define RG_BREMEN_PLUGIN_COPYRIGHT	"GPL v3"
 

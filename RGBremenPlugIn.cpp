@@ -403,7 +403,8 @@ void RGBremenPlugIn::OnGetTagItem(EuroScopePlugIn::CFlightPlan FlightPlan, EuroS
 	case RG_BREMEN_TAG_ITEM_TRANSFER_FLIGHT_LEVEL:
 		if (nss.isValid) {
 			std::stringstream ss;
-			ss << "@FL" << nss.copAltitude / 1000 << (nss.clbDesc > 0) ? "^" : (nss.clbDesc < 0) ? "|" : "-";
+			//ss << "@FL" << nss.copAltitude / 1000 << (nss.clbDesc > 0) ? "^" : (nss.clbDesc < 0) ? "|" : "-";
+			ss << nss.copAltitude / 1000 << (nss.clbDesc > 0) ? "^" : (nss.clbDesc < 0) ? "|" : "-"; // Disable @FL for Chris
 			strncpy_s(sItemString, 15, ss.str().c_str(), 15);
 		}
 		break;
