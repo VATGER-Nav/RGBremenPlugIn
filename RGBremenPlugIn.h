@@ -21,6 +21,7 @@
 #include "Calculation/Calculations.h"
 #include "Http/Http.h"
 #include "Threading/PeriodicAction.h"
+#include "Crypto/Sha256.h"
 #include "SidStar/SidStarHandler.h"
 #include "Tag/TagHandler.h"
 #include "Weather/Weather.h"
@@ -51,6 +52,7 @@ private:
 	void InitializeSidStarHandler(std::string& pluginName);
 	void LoadConfiguration(std::string& pluginName);
 	void InitializeAirspeedHandler();
+	void CheckForGRPNotamUpdate();
 	void LogMessage(std::string msg, std::string channel);
 	void LogDebugMessage(std::string msg, std::string channel);
 

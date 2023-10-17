@@ -99,6 +99,9 @@
     <ClInclude Include="FlightPlan\DeliveryHelper.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Crypto\Sha256.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="RGBremenPlugIn.cpp">
@@ -153,6 +156,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="FlightPlan\DeliveryHelper.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Crypto\Sha256.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

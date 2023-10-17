@@ -29,6 +29,9 @@ public:
 	// SID STAR VIA Checker Download URL
 	bool GetSidStarForceDownload();
 	std::string GetSidStarDownloadUrl();
+	// NOTAM and TRA Download
+	bool GetNotamForceDownload();
+	std::string GetGRPNotamDownloadUrl();
 	// Custom Colors
 	bool GetCustomColorsUsageFlag();
 	void ToggleCustomColorsUsageFlag();

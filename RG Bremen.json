@@ -1,8 +1,10 @@
 {
 	"debug":  true,
 	"data": {
-		"sidstarForceDownload":  false,
-		"sidstarurl": "https://dms.vatsim-germany.org/s/CQxss89irorjZmp/download/clbdesc_sidstar.txt"
+		"sidstarForceDownload": false,
+		"sidstarurl": "https://dms.vatsim-germany.org/s/CQxss89irorjZmp/download/clbdesc_sidstar.txt",
+		"grpluginForceNotamUpdate": true,
+		"grpluginNotamUrl": "https://raw.githubusercontent.com/VATGER-Nav/grp-maps/main/RG%20Bremen/GRpluginMaps.txt"
 	},
 	"colors": {
 		"useCustomColors": true,

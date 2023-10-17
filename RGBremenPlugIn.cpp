@@ -82,6 +82,27 @@ void RGBremenPlugIn::InitializeAirspeedHandler()
 	LogMessage("AirSpeedHandler initialized", "AirSpeedHandler");
 }
 
+void RGBremenPlugIn::CheckForGRPNotamUpdate()
+{
+	std::string localNotamFilePath = m_Config->GetWorkingDirectory() + "/../Ground Radar Plugin/GRpluginMaps.txt";
+	std::string localNotamFileSHA = Sha256::CalculateFileSHA256(localNotamFilePath);
+	LogDebugMessage(localNotamFileSHA, "GRP NOTAM");
+
+	HRESULT hr;
+	std::string tempFile = m_Config->GetWorkingDirectory() + "/temp_maps.txt";
+	hr = URLDownloadToFile(NULL, m_Config->GetGRPNotamDownloadUrl().c_str(), tempFile.c_str(), 0, NULL);
+	if (hr == S_OK)
+	{
+		std::string tempFileSHA = Sha256::CalculateFileSHA256(tempFile);
+		LogDebugMessage(tempFileSHA, "GRP NOTAM");
+		if (tempFileSHA != localNotamFileSHA) {
+			CopyFile(tempFile.c_str(), localNotamFilePath.c_str(), false);
+			MessageBox(NULL, "Ground Radar PlugIn Maps updated. Either restart EuroScope to enable changes or manually reload the changes using the Ground Radar PlugIn functions.", "GRP NOTAM", MB_ICONWARNING);
+		}
+		DeleteFile(tempFile.c_str());
+	}
+}
+
 RGBremenPlugIn::RGBremenPlugIn() : EuroScopePlugIn::CPlugIn(
 		EuroScopePlugIn::COMPATIBILITY_CODE,
 		RG_BREMEN_PLUGIN_NAME,
@@ -98,6 +119,15 @@ RGBremenPlugIn::RGBremenPlugIn() : EuroScopePlugIn::CPlugIn(
 
 	// Load configuration
 	LoadConfiguration(pluginName);
+
+	// Check for GRP NOTAM
+	try {
+		if(m_Config->GetNotamForceDownload())
+			CheckForGRPNotamUpdate();
+	}
+	catch (std::exception& e) {
+		LogDebugMessage(e.what(), "GRP NOTAM");
+	}
 
 	// Load SidStarHandler
 	InitializeSidStarHandler(pluginName);

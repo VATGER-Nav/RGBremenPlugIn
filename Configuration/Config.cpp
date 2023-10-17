@@ -61,6 +61,16 @@ std::string Config::GetSidStarDownloadUrl()
 	return m_configData["data"]["sidstarurl"];
 }
 
+bool Config::GetNotamForceDownload()
+{
+	return m_configData["data"]["grpluginForceNotamUpdate"];
+}
+
+std::string Config::GetGRPNotamDownloadUrl()
+{
+	return m_configData["data"]["grpluginNotamUrl"];
+}
+
 bool Config::GetCustomColorsUsageFlag()
 {
 	return m_configData["colors"]["useCustomColors"];

@@ -3,6 +3,7 @@
 #include <string>
 #include <windows.h>
 #include <wininet.h>
+#include <iostream>
 
 #include "../Configuration/Defines.h"
 #include "../Helpers.h"
